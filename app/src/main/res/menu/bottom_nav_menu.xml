@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_beranda"
+        android:title="Beranda" />
+    <item
+        android:id="@+id/nav_omset"
+        android:title="Omset" />
+    <item
+        android:id="@+id/nav_riwayat"
+        android:title="Riwayat" />
+    <item
+        android:id="@+id/nav_pengaturan"
+        android:title="Profil" />
+</menu>
