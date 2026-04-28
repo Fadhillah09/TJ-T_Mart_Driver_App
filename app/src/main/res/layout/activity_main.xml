@@ -15,7 +15,71 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="?android:attr/windowBackground"
-        app:menu="@menu/bottom_nav_menu" />
+        android:background="#FFFFFF"
+        app:itemIconTint="@drawable/bottom_nav_selector"
+        app:itemTextColor="@drawable/bottom_nav_selector"
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/bottom_nav_menu"
+        app:elevation="8dp" />
+
+    <!-- Ring sonar 1 (luar) -->
+    <View
+        android:id="@+id/ringOuter"
+        android:layout_width="54dp"
+        android:layout_height="54dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="22dp"
+        android:background="@drawable/bg_ring_pulse"
+        android:alpha="0"
+        android:elevation="10dp" />
+
+    <!-- Ring sonar 2 (dalam) -->
+    <View
+        android:id="@+id/ringInner"
+        android:layout_width="54dp"
+        android:layout_height="54dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="22dp"
+        android:background="@drawable/bg_ring_pulse"
+        android:alpha="0"
+        android:elevation="10dp" />
+
+    <!-- Tombol Absensi menonjol di tengah -->
+    <LinearLayout
+        android:id="@+id/btnAbsensi"
+        android:layout_width="54dp"
+        android:layout_height="54dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="22dp"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="@drawable/bg_absensi_button"
+        android:clickable="true"
+        android:focusable="true"
+        android:elevation="12dp">
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:src="@drawable/ic_nav_absensi"
+            android:tint="#FFFFFF" />
+
+    </LinearLayout>
+
+    <!-- Label Absensi -->
+    <TextView
+        android:id="@+id/tvAbsensiLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="9dp"
+        android:text="Absensi"
+        android:textSize="10sp"
+        android:textColor="#E53935"
+        android:textStyle="bold" />
 
 </RelativeLayout>

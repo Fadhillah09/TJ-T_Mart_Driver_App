@@ -1,7 +1,19 @@
 <resources>
     <style name="Theme.TJTMartDriverApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorPrimary">#FFFFFF</item>
         <item name="colorSecondary">@color/teal_200</item>
-        <item name="android:statusBarColor">?attr/colorPrimary</item>
+        <item name="android:statusBarColor">#FFFFFF</item>
+        <item name="android:windowLightStatusBar">true</item>
+
+        <!-- Poppins sebagai font global -->
+        <item name="android:fontFamily">@font/poppins</item>
+        <item name="fontFamily">@font/poppins</item>
+
+        <!-- Perkecil font label bottom nav -->
+        <item name="textAppearanceCaption">@style/BottomNavTextStyle</item>
+    </style>
+
+    <style name="BottomNavTextStyle" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textSize">9sp</item>
     </style>
 </resources>

@@ -14,6 +14,8 @@ import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.OmsetResponse
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.Pesanan
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.PesananResponse
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.databinding.FragmentBerandaBinding
+import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main.notifikasi.NotifikasiFragment
+import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main.profil.ProfilFragment
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.utils.SessionManager
 import retrofit2.Call
 import retrofit2.Callback
@@ -41,7 +43,6 @@ class BerandaFragment : Fragment() {
         binding.rvRiwayat.layoutManager = LinearLayoutManager(requireContext())
         binding.rvRiwayat.isNestedScrollingEnabled = false
 
-        // Menggunakan warna standar Android agar tidak error
         binding.swipeRefresh.setColorSchemeResources(android.R.color.holo_red_dark)
         binding.swipeRefresh.setOnRefreshListener { loadAllData() }
 
@@ -50,12 +51,29 @@ class BerandaFragment : Fragment() {
             tampilKosong()
         }
 
+        // Navigasi ke ProfilFragment
+        binding.layoutAvatar.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, ProfilFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+
+        // Navigasi ke NotifikasiFragment
+        binding.ivNotifikasi.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, NotifikasiFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+
         loadAllData()
     }
 
     private fun loadAllData() {
         loadPesanan()
         loadOmset()
+        loadRiwayat()
     }
 
     private fun loadPesanan() {
@@ -66,19 +84,28 @@ class BerandaFragment : Fragment() {
                     binding.swipeRefresh.isRefreshing = false
                     if (response.isSuccessful && response.body() != null) {
                         val list = response.body()?.data
-                        val belumDiklaim = list?.find { it.kurirId == null || it.kurirId == session.getUserId() }
 
-                        if (belumDiklaim != null) {
-                            pesananAktif = belumDiklaim
-                            tampilPesanan(belumDiklaim)
+                        val belumDiklaim = list?.find { it.kurirId == null }
+                        val sudahDiklaim = list?.find {
+                            it.kurirId == session.getUserId() && it.statusAntar == "sedang diantar"
+                        }
+
+                        val tampil = belumDiklaim ?: sudahDiklaim
+
+                        if (tampil != null) {
+                            pesananAktif = tampil
+                            tampilPesanan(tampil)
                         } else {
                             tampilKosong()
                         }
+                    } else {
+                        Toast.makeText(requireContext(), "Gagal load pesanan: ${response.code()}", Toast.LENGTH_SHORT).show()
                     }
                 }
                 override fun onFailure(call: Call<PesananResponse>, t: Throwable) {
                     if (_binding == null) return
                     binding.swipeRefresh.isRefreshing = false
+                    Toast.makeText(requireContext(), "Error: ${t.message}", Toast.LENGTH_LONG).show()
                 }
             })
     }
@@ -88,8 +115,7 @@ class BerandaFragment : Fragment() {
         binding.layoutPesananKosong.visibility = View.GONE
 
         binding.tvNamaPemesan.text = p.user?.name ?: "Customer"
-        // Ganti address sesuai nama variabel di model User kamu
-        binding.tvLokasiPesanan.text = "Lokasi tidak diketahui"
+        binding.tvLokasiPesanan.text = p.user?.getNamaLokasiLengkap() ?: "Lokasi tidak diketahui"
 
         val nf = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
         binding.tvTotalHarga.text = nf.format(p.totalHarga)
@@ -115,12 +141,18 @@ class BerandaFragment : Fragment() {
         ApiClient.instance.claimPesanan(session.getBearerToken(), id)
             .enqueue(object : Callback<MessageResponse> {
                 override fun onResponse(call: Call<MessageResponse>, response: Response<MessageResponse>) {
+                    if (_binding == null) return
                     if (response.isSuccessful) {
                         Toast.makeText(requireContext(), "Pesanan diterima!", Toast.LENGTH_SHORT).show()
                         loadPesanan()
+                    } else {
+                        Toast.makeText(requireContext(), "Gagal klaim: ${response.code()} - ${response.errorBody()?.string()}", Toast.LENGTH_LONG).show()
                     }
                 }
-                override fun onFailure(call: Call<MessageResponse>, t: Throwable) {}
+                override fun onFailure(call: Call<MessageResponse>, t: Throwable) {
+                    if (_binding == null) return
+                    Toast.makeText(requireContext(), "Error klaim: ${t.message}", Toast.LENGTH_LONG).show()
+                }
             })
     }
 
@@ -128,13 +160,19 @@ class BerandaFragment : Fragment() {
         ApiClient.instance.selesaikanPesanan(session.getBearerToken(), id)
             .enqueue(object : Callback<MessageResponse> {
                 override fun onResponse(call: Call<MessageResponse>, response: Response<MessageResponse>) {
+                    if (_binding == null) return
                     if (response.isSuccessful) {
-                        Toast.makeText(requireContext(), "Selesai!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Pesanan selesai!", Toast.LENGTH_SHORT).show()
                         pesananAktif = null
                         loadAllData()
+                    } else {
+                        Toast.makeText(requireContext(), "Gagal selesaikan: ${response.code()} - ${response.errorBody()?.string()}", Toast.LENGTH_LONG).show()
                     }
                 }
-                override fun onFailure(call: Call<MessageResponse>, t: Throwable) {}
+                override fun onFailure(call: Call<MessageResponse>, t: Throwable) {
+                    if (_binding == null) return
+                    Toast.makeText(requireContext(), "Error selesai: ${t.message}", Toast.LENGTH_LONG).show()
+                }
             })
     }
 
@@ -152,6 +190,20 @@ class BerandaFragment : Fragment() {
                     }
                 }
                 override fun onFailure(call: Call<OmsetResponse>, t: Throwable) {}
+            })
+    }
+
+    private fun loadRiwayat() {
+        ApiClient.instance.getRiwayat(session.getBearerToken())
+            .enqueue(object : Callback<PesananResponse> {
+                override fun onResponse(call: Call<PesananResponse>, response: Response<PesananResponse>) {
+                    if (_binding == null) return
+                    if (response.isSuccessful && response.body() != null) {
+                        val list = response.body()?.data ?: emptyList()
+                        binding.rvRiwayat.adapter = RiwayatAdapter(list)
+                    }
+                }
+                override fun onFailure(call: Call<PesananResponse>, t: Throwable) {}
             })
     }
 
