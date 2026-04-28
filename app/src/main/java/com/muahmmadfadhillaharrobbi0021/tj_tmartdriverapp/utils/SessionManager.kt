@@ -26,6 +26,18 @@ class SessionManager(context: Context) {
 
     fun getBearerToken(): String = "Bearer ${getToken()}"
 
+    fun rejectPesananLokal(pesananId: Int) {
+        val rejectedIds = getRejectedPesananIds().toMutableSet()
+        rejectedIds.add(pesananId.toString())
+        // Ganti 'sharedPreferences' jadi 'pref' atau nama variabel yang ada di atas
+        pref.edit().putStringSet("rejected_orders", rejectedIds).apply()
+    }
+
+    fun getRejectedPesananIds(): Set<String> {
+        // Ganti 'sharedPreferences' jadi 'pref' atau nama variabel yang ada di atas
+        return pref.getStringSet("rejected_orders", emptySet()) ?: emptySet()
+    }
+
     fun logout() {
         editor.clear()
         editor.apply()

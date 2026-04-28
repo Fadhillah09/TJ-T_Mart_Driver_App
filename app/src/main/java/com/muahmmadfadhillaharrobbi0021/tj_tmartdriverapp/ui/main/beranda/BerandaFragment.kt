@@ -1,6 +1,7 @@
 package com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main.beranda
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,11 +10,11 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.R
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.api.ApiClient
+import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.databinding.FragmentBerandaBinding
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.MessageResponse
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.OmsetResponse
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.Pesanan
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.PesananResponse
-import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.databinding.FragmentBerandaBinding
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main.notifikasi.NotifikasiFragment
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main.profil.ProfilFragment
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.utils.SessionManager
@@ -21,14 +22,13 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.text.NumberFormat
-import java.util.*
+import java.util.Locale
 
 class BerandaFragment : Fragment() {
 
     private var _binding: FragmentBerandaBinding? = null
     private val binding get() = _binding!!
     private lateinit var session: SessionManager
-    private var pesananAktif: Pesanan? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentBerandaBinding.inflate(inflater, container, false)
@@ -40,16 +40,17 @@ class BerandaFragment : Fragment() {
         session = SessionManager(requireContext())
 
         binding.tvNamaDriver.text = "Halo ${session.getUserName()}!"
+
+        // Setup RecyclerView Riwayat
         binding.rvRiwayat.layoutManager = LinearLayoutManager(requireContext())
         binding.rvRiwayat.isNestedScrollingEnabled = false
 
+        // Setup RecyclerView Pesanan Masuk (Antrian)
+        binding.rvPesananMasuk.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvPesananMasuk.isNestedScrollingEnabled = false
+
         binding.swipeRefresh.setColorSchemeResources(android.R.color.holo_red_dark)
         binding.swipeRefresh.setOnRefreshListener { loadAllData() }
-
-        binding.btnTolak.setOnClickListener {
-            pesananAktif = null
-            tampilKosong()
-        }
 
         // Navigasi ke ProfilFragment
         binding.layoutAvatar.setOnClickListener {
@@ -82,59 +83,78 @@ class BerandaFragment : Fragment() {
                 override fun onResponse(call: Call<PesananResponse>, response: Response<PesananResponse>) {
                     if (_binding == null) return
                     binding.swipeRefresh.isRefreshing = false
+
                     if (response.isSuccessful && response.body() != null) {
-                        val list = response.body()?.data
+                        val list = response.body()?.data ?: emptyList()
+                        val rejectedLocalIds = session.getRejectedPesananIds()
 
-                        val belumDiklaim = list?.find { it.kurirId == null }
-                        val sudahDiklaim = list?.find {
-                            it.kurirId == session.getUserId() && it.statusAntar == "sedang diantar"
+                        // Filter hanya yang ditolak secara lokal saja
+                        val filteredByReject = list.filter { it.id.toString() !in rejectedLocalIds }
+
+                        // 1. Cek Pesanan Aktif (Sedang Diantar)
+                        val sedangSayaAntar = filteredByReject.find {
+                            it.kurirId == session.getUserId() && it.statusAntar?.lowercase() == "sedang diantar"
                         }
 
-                        val tampil = belumDiklaim ?: sudahDiklaim
-
-                        if (tampil != null) {
-                            pesananAktif = tampil
-                            tampilPesanan(tampil)
+                        if (sedangSayaAntar != null) {
+                            tampilkanDaftar(listOf(sedangSayaAntar), isActive = true)
                         } else {
-                            tampilKosong()
+                            // 2. Ambil semua pesanan yang statusnya 'diproses'
+                            // Coba hapus dulu it.kurirId == null untuk testing jika datanya tetap tidak muncul
+                            val antrianPesanan = filteredByReject.filter {
+                                it.statusAntar?.lowercase() == "diproses"
+                            }
+
+                            if (antrianPesanan.isNotEmpty()) {
+                                tampilkanDaftar(antrianPesanan, isActive = false)
+                            } else {
+                                tampilKosong()
+                            }
                         }
-                    } else {
-                        Toast.makeText(requireContext(), "Gagal load pesanan: ${response.code()}", Toast.LENGTH_SHORT).show()
                     }
                 }
+
                 override fun onFailure(call: Call<PesananResponse>, t: Throwable) {
                     if (_binding == null) return
                     binding.swipeRefresh.isRefreshing = false
-                    Toast.makeText(requireContext(), "Error: ${t.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(requireContext(), "Error: ${t.message}", Toast.LENGTH_SHORT).show()
                 }
             })
     }
 
-    private fun tampilPesanan(p: Pesanan) {
-        binding.layoutPesananAda.visibility = View.VISIBLE
+    // Fungsi pembantu agar kode lebih rapi
+    private fun tampilkanDaftar(list: List<Pesanan>, isActive: Boolean) {
+        binding.rvPesananMasuk.visibility = View.VISIBLE
         binding.layoutPesananKosong.visibility = View.GONE
-
-        binding.tvNamaPemesan.text = p.user?.name ?: "Customer"
-        binding.tvLokasiPesanan.text = p.user?.getNamaLokasiLengkap() ?: "Lokasi tidak diketahui"
-
-        val nf = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
-        binding.tvTotalHarga.text = nf.format(p.totalHarga)
-        binding.tvStatusPesanan.text = p.statusAntar ?: "Siap Diantar"
-
-        if (p.kurirId != null && p.kurirId == session.getUserId()) {
-            binding.btnClaim.text = "Tandai Selesai"
-            binding.btnClaim.setOnClickListener { selesaikanPesanan(p.id) }
-            binding.btnTolak.visibility = View.GONE
-        } else {
-            binding.btnClaim.text = "Terima"
-            binding.btnClaim.setOnClickListener { claimPesanan(p.id) }
-            binding.btnTolak.visibility = View.VISIBLE
-        }
+        binding.rvPesananMasuk.adapter = PesananMasukAdapter(
+            list = list,
+            onAccept = { pesanan ->
+                if (isActive) selesaikanPesanan(pesanan.id) else claimPesanan(pesanan.id)
+            },
+            onReject = { pesanan ->
+                session.rejectPesananLokal(pesanan.id)
+                loadPesanan()
+            },
+            onItemClick = { pesanan -> bukaDetailPesanan(pesanan) }
+        )
     }
 
     private fun tampilKosong() {
-        binding.layoutPesananAda.visibility = View.GONE
+        binding.rvPesananMasuk.visibility = View.GONE
         binding.layoutPesananKosong.visibility = View.VISIBLE
+    }
+    private fun bukaDetailPesanan(pesanan: Pesanan) {
+        val detailFragment = DetailPesananFragment.newInstance(pesanan.id)
+        parentFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                android.R.anim.fade_in,
+                android.R.anim.fade_out,
+                android.R.anim.fade_in,
+                android.R.anim.fade_out
+            )
+            .replace(R.id.fragmentContainer, detailFragment)
+            .addToBackStack(null) // Agar tombol back berfungsi
+            .commit()
     }
 
     private fun claimPesanan(id: Int) {
@@ -145,8 +165,12 @@ class BerandaFragment : Fragment() {
                     if (response.isSuccessful) {
                         Toast.makeText(requireContext(), "Pesanan diterima!", Toast.LENGTH_SHORT).show()
                         loadPesanan()
+                    } else if (response.code() == 409) {
+                        // Berikan pesan yang lebih manusiawi
+                        Toast.makeText(requireContext(), "Yah, pesanan sudah diambil driver lain!", Toast.LENGTH_LONG).show()
+                        loadPesanan()
                     } else {
-                        Toast.makeText(requireContext(), "Gagal klaim: ${response.code()} - ${response.errorBody()?.string()}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(requireContext(), "Gagal klaim: ${response.code()}", Toast.LENGTH_LONG).show()
                     }
                 }
                 override fun onFailure(call: Call<MessageResponse>, t: Throwable) {
@@ -163,10 +187,9 @@ class BerandaFragment : Fragment() {
                     if (_binding == null) return
                     if (response.isSuccessful) {
                         Toast.makeText(requireContext(), "Pesanan selesai!", Toast.LENGTH_SHORT).show()
-                        pesananAktif = null
                         loadAllData()
                     } else {
-                        Toast.makeText(requireContext(), "Gagal selesaikan: ${response.code()} - ${response.errorBody()?.string()}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(requireContext(), "Gagal selesaikan: ${response.code()}", Toast.LENGTH_LONG).show()
                     }
                 }
                 override fun onFailure(call: Call<MessageResponse>, t: Throwable) {
@@ -183,9 +206,9 @@ class BerandaFragment : Fragment() {
                     if (_binding != null && response.isSuccessful && response.body()?.data != null) {
                         val data = response.body()!!.data!!
                         val nf = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
+                        nf.maximumFractionDigits = 0
                         binding.tvSaldo.text = nf.format(data.saldo)
                         binding.tvNomorRek.text = data.nomorRekening ?: "-"
-                        binding.tvNamaBank.text = data.namaBank ?: "-"
                         binding.tvTanggalGaji.text = data.tanggalGaji ?: "-"
                     }
                 }
@@ -199,11 +222,27 @@ class BerandaFragment : Fragment() {
                 override fun onResponse(call: Call<PesananResponse>, response: Response<PesananResponse>) {
                     if (_binding == null) return
                     if (response.isSuccessful && response.body() != null) {
-                        val list = response.body()?.data ?: emptyList()
-                        binding.rvRiwayat.adapter = RiwayatAdapter(list)
+
+                        // 1. Ambil daftar ID yang ditolak lokal (agar tidak muncul di riwayat juga)
+                        val rejectedLocalIds = session.getRejectedPesananIds()
+
+                        val listRaw = response.body()?.data ?: emptyList()
+
+                        // 2. Filter data riwayat: Buang pesanan yang ID-nya ada di daftar tolak lokal
+                        val listRiwayatFiltered = listRaw.filter { it.id.toString() !in rejectedLocalIds }
+
+                        // 3. Tampilkan hanya data yang sudah difilter
+                        if (listRiwayatFiltered.isNotEmpty()) {
+                            binding.rvRiwayat.adapter = RiwayatAdapter(listRiwayatFiltered)
+                        } else {
+                            // Opsional: Jika hasil filter kosong, kosongkan adapter
+                            binding.rvRiwayat.adapter = RiwayatAdapter(emptyList())
+                        }
                     }
                 }
-                override fun onFailure(call: Call<PesananResponse>, t: Throwable) {}
+                override fun onFailure(call: Call<PesananResponse>, t: Throwable) {
+                    Log.e("API_ERROR", "Gagal load riwayat: ${t.message}")
+                }
             })
     }
 
