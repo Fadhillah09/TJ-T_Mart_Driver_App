@@ -20,7 +20,6 @@
             android:paddingTop="16dp"
             android:paddingBottom="16dp">
 
-            <!-- ===== HEADER: Halo User! + Bell + Avatar ===== -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -39,19 +38,17 @@
                     android:textSize="22sp"
                     android:textStyle="bold" />
 
-                <!-- Icon Lonceng -->
                 <ImageView
                     android:id="@+id/ivNotifikasi"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
                     android:src="@android:drawable/ic_popup_reminder"
-                    android:tint="#888888"
                     android:layout_marginEnd="12dp"
                     android:clickable="true"
                     android:focusable="true"
-                    android:padding="4dp" />
+                    android:padding="4dp"
+                    app:tint="#888888" />
 
-                <!-- Avatar + Dot Online -->
                 <FrameLayout
                     android:id="@+id/layoutAvatar"
                     android:layout_width="40dp"
@@ -59,7 +56,6 @@
                     android:clickable="true"
                     android:focusable="true">
 
-                    <!-- Foto Profil Bulat -->
                     <ImageView
                         android:id="@+id/ivAvatar"
                         android:layout_width="40dp"
@@ -67,10 +63,9 @@
                         android:src="@android:drawable/ic_menu_myplaces"
                         android:background="@drawable/bg_circle_grey"
                         android:padding="6dp"
-                        android:tint="#888888"
-                        android:scaleType="centerCrop" />
+                        android:scaleType="centerCrop"
+                        app:tint="#888888" />
 
-                    <!-- Dot Hijau Online -->
                     <View
                         android:layout_width="12dp"
                         android:layout_height="12dp"
@@ -82,7 +77,6 @@
 
             </LinearLayout>
 
-            <!-- ===== PESANAN MASUK ===== -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -112,101 +106,14 @@
 
             </androidx.cardview.widget.CardView>
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/layoutPesananAda"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvPesananMasuk"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:visibility="gone"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="6dp"
-                app:cardUseCompatPadding="true"
-                app:cardBackgroundColor="#FFFFFF">
+                android:nestedScrollingEnabled="false"
+                android:visibility="gone" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="20dp"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="16dp">
-
-                    <TextView
-                        android:id="@+id/tvNamaPemesan"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="#000000" />
-
-                    <TextView
-                        android:id="@+id/tvLokasiPesanan"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="#666666"
-                        android:textSize="13sp"
-                        android:layout_marginTop="2dp" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginTop="8dp">
-
-                        <TextView
-                            android:id="@+id/tvTotalHarga"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:textColor="#E53935"
-                            android:textSize="15sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/tvStatusPesanan"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textColor="#666666"
-                            android:textSize="12sp" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="12dp">
-
-                        <Button
-                            android:id="@+id/btnTolak"
-                            android:layout_width="0dp"
-                            android:layout_height="40dp"
-                            android:layout_weight="1"
-                            android:layout_marginEnd="8dp"
-                            android:text="Tolak"
-                            android:textColor="#E53935"
-                            android:backgroundTint="#FFFFFF"
-                            android:strokeColor="#E53935"
-                            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
-
-                        <Button
-                            android:id="@+id/btnClaim"
-                            android:layout_width="0dp"
-                            android:layout_height="40dp"
-                            android:layout_weight="1"
-                            android:text="Terima"
-                            android:textColor="#FFFFFF"
-                            android:backgroundTint="#E53935"
-                            style="@style/Widget.MaterialComponents.Button" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- ===== OMSET ===== -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -244,7 +151,7 @@
                             android:layout_width="16dp"
                             android:layout_height="16dp"
                             android:src="@drawable/ic_nav_omset"
-                            android:tint="#888888" />
+                            app:tint="#888888" />
 
                         <TextView
                             android:layout_width="0dp"
@@ -255,8 +162,6 @@
                             android:textSize="10sp"
                             android:letterSpacing="0.08"
                             android:layout_marginStart="6dp" />
-
-
 
                     </LinearLayout>
 
@@ -350,7 +255,6 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- ===== RIWAYAT ===== -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

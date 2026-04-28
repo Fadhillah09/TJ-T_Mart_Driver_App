@@ -10,9 +10,16 @@ data class Pesanan(
     @SerializedName("status_antar") val statusAntar: String?,
     @SerializedName("tipe_layanan") val tipeLayanan: String?,
     @SerializedName("kurir_id") val kurirId: Int?,
+    @SerializedName("metode_pembayaran") val metodePembayaran: String?,
     @SerializedName("created_at") val createdAt: String?,
-    val user: UserPemesan?
+    val user: UserPemesan?,
+    @SerializedName("details") val details: List<ItemPesanan>?
 ) {
+    data class ItemPesanan(
+        @SerializedName("nama_produk") val namaProduk: String?,
+        val qty: Int?,
+        val harga: Int?
+    )
     data class UserPemesan(
         val name: String?,
         @SerializedName("no_telp") val noTelp: String?,
