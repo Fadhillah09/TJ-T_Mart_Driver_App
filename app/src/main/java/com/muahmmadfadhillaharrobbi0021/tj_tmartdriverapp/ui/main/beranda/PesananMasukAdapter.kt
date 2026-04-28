@@ -12,7 +12,7 @@ class PesananMasukAdapter(
     private val list: List<Pesanan>,
     private val onAccept: (Pesanan) -> Unit,
     private val onReject: (Pesanan) -> Unit,
-    private val onItemClick: (Pesanan) -> Unit // Tambahkan callback untuk detail
+    private val onItemClick: (Pesanan) -> Unit
 ) : RecyclerView.Adapter<PesananMasukAdapter.ViewHolder>() {
 
     inner class ViewHolder(val binding: ItemPesananMasukBinding) : RecyclerView.ViewHolder(binding.root)
