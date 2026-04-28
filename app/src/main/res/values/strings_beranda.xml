@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TJ-T Mart Driver</string>
+    <string name="beranda_greeting">Halo, %1$s!</string>
+    <string name="beranda_label_saldo">Saldo Anda</string>
+    <string name="beranda_label_riwayat">Riwayat Pengiriman</string>
+
+    <string name="beranda_status_siap">Siap Diantar</string>
+    <string name="beranda_btn_terima">Terima Pesanan</string>
+    <string name="beranda_btn_selesai">Tandai Selesai</string>
+    <string name="beranda_btn_tolak">Tolak</string>
+
+    <string name="beranda_no_order_title">Belum Ada Pesanan</string>
+    <string name="beranda_no_order_desc">Tetap standby, orderan akan muncul di sini.</string>
+</resources>
