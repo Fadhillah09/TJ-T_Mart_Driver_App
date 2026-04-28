@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.R
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.api.ApiClient
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.MessageResponse
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.OmsetResponse
