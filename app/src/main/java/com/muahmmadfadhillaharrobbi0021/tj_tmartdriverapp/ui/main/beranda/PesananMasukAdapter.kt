@@ -1,6 +1,7 @@
 package com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main.beranda
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.databinding.ItemPesananMasukBinding
@@ -28,31 +29,35 @@ class PesananMasukAdapter(
         nf.maximumFractionDigits = 0
 
         with(holder.binding) {
-            // Hilangkan tanda #
             tvIdPesanan.text = item.id.toString()
             tvNamaPembeli.text = item.user?.name ?: "Pelanggan"
             tvAlamat.text = item.user?.getNamaLokasiLengkap() ?: "Alamat tidak tersedia"
             tvTotalHarga.text = nf.format(item.totalHarga ?: 0)
-
-            // Tampilkan Metode Pembayaran (asumsi field: metodePembayaran)
             tvMetodePembayaran.text = "Pembayaran: ${item.metodePembayaran ?: "Cash"}"
-
             tvStatus.text = item.statusAntar?.replaceFirstChar { it.uppercase() }
 
+            // LOGIKA TOMBOL: Sesuai instruksi agar tidak hilang saat diterima
             if (item.statusAntar?.lowercase() == "sedang diantar") {
+                // Jika sudah diterima, pilihan berubah menjadi Selesaikan dan Batalkan
                 btnTerima.text = "Selesaikan"
-                btnTolak.isEnabled = false
-                btnTolak.alpha = 0.5f
+                btnTolak.text = "Batalkan Pesanan"
+
+                // Pastikan tombol batalkan aktif
+                btnTolak.isEnabled = true
+                btnTolak.alpha = 1.0f
             } else {
+                // Jika masih dalam antrean (status diproses)
                 btnTerima.text = "Terima"
+                btnTolak.text = "Tolak"
                 btnTolak.isEnabled = true
                 btnTolak.alpha = 1.0f
             }
 
+            // Aksi tombol
             btnTerima.setOnClickListener { onAccept(item) }
             btnTolak.setOnClickListener { onReject(item) }
 
-            // Klik pada kartu untuk melihat detail
+            // Navigasi ke detail saat kartu diklik
             root.setOnClickListener { onItemClick(item) }
         }
     }

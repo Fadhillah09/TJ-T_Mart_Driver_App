@@ -86,39 +86,32 @@ class BerandaFragment : Fragment() {
 
                     if (response.isSuccessful && response.body() != null) {
                         val list = response.body()?.data ?: emptyList()
-                        val rejectedLocalIds = session.getRejectedPesananIds()
+                        val myId = session.getUserId()
 
-                        // Filter hanya yang ditolak secara lokal saja
-                        val filteredByReject = list.filter { it.id.toString() !in rejectedLocalIds }
-
-                        // 1. Cek Pesanan Aktif (Sedang Diantar)
-                        val sedangSayaAntar = filteredByReject.find {
-                            it.kurirId == session.getUserId() && it.statusAntar?.lowercase() == "sedang diantar"
+                        // 1. Cari pesanan yang sedang SAYA antar
+                        val pesananAktif = list.find {
+                            it.kurirId == myId && it.statusAntar?.lowercase() == "sedang diantar"
                         }
 
-                        if (sedangSayaAntar != null) {
-                            tampilkanDaftar(listOf(sedangSayaAntar), isActive = true)
+                        if (pesananAktif != null) {
+                            // Jika ada pesanan aktif, tetap tampilkan di daftar "Pesanan Masuk"
+                            // tapi kita kirim flag isActive = true agar tombolnya berubah
+                            tampilkanDaftar(listOf(pesananAktif), isActive = true)
                         } else {
-                            // 2. Ambil semua pesanan yang statusnya 'diproses'
-                            // Coba hapus dulu it.kurirId == null untuk testing jika datanya tetap tidak muncul
-                            val antrianPesanan = filteredByReject.filter {
-                                it.statusAntar?.lowercase() == "diproses"
+                            // 2. Jika tidak ada pesanan aktif, tampilkan antrian pesanan umum (kurirId NULL)
+                            val antrian = list.filter {
+                                it.statusAntar?.lowercase() == "diproses" && it.kurirId == null
                             }
 
-                            if (antrianPesanan.isNotEmpty()) {
-                                tampilkanDaftar(antrianPesanan, isActive = false)
+                            if (antrian.isNotEmpty()) {
+                                tampilkanDaftar(antrian, isActive = false)
                             } else {
                                 tampilKosong()
                             }
                         }
                     }
                 }
-
-                override fun onFailure(call: Call<PesananResponse>, t: Throwable) {
-                    if (_binding == null) return
-                    binding.swipeRefresh.isRefreshing = false
-                    Toast.makeText(requireContext(), "Error: ${t.message}", Toast.LENGTH_SHORT).show()
-                }
+                override fun onFailure(call: Call<PesananResponse>, t: Throwable) { /* ... */ }
             })
     }
 
