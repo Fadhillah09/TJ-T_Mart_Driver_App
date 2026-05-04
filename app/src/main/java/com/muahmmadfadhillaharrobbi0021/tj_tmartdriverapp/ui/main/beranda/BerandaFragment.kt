@@ -104,11 +104,6 @@ class BerandaFragment : Fragment() {
         binding.rvPesananMasuk.isNestedScrollingEnabled = false
     }
 
-    /**
-     * Update visual segmented toggle:
-     * - Pilihan aktif: background merah, ikon putih
-     * - Pilihan tidak aktif: background transparan, ikon abu
-     */
     private fun updateToggleUI() {
         if (isViewGeser) {
             binding.btnViewGeser.setBackgroundResource(R.drawable.bg_toggle_selected)
@@ -147,8 +142,10 @@ class BerandaFragment : Fragment() {
                         if (pesananAktif != null) {
                             tampilkanDaftar(listOf(pesananAktif), isActive = true)
                         } else {
+                            val rejectedIds = session.getRejectedPesananIds()
                             val antrian = list.filter {
                                 it.statusAntar?.lowercase() == "diproses" && it.kurirId == null
+                                        && it.id.toString() !in rejectedIds
                             }
                             if (antrian.isNotEmpty()) {
                                 tampilkanDaftar(antrian, isActive = false)
@@ -174,12 +171,16 @@ class BerandaFragment : Fragment() {
         binding.rvPesananMasuk.adapter = PesananMasukAdapter(
             list = list,
             viewMode = if (isViewGeser) PesananMasukAdapter.VIEW_GESER else PesananMasukAdapter.VIEW_BAWAH,
+            isActive = isActive,
             onAccept = { pesanan ->
                 if (isActive) selesaikanPesanan(pesanan.id) else claimPesanan(pesanan.id)
             },
             onReject = { pesanan ->
-                session.rejectPesananLokal(pesanan.id)
-                loadPesanan()
+                if (isActive) batalkanPesanan(pesanan.id) else {
+                    session.rejectPesananLokal(pesanan.id)
+                    Toast.makeText(requireContext(), "Pesanan ditolak.", Toast.LENGTH_SHORT).show()
+                    loadPesanan()
+                }
             },
             onItemClick = { pesanan -> bukaDetailPesanan(pesanan) }
         )
@@ -240,6 +241,25 @@ class BerandaFragment : Fragment() {
                 override fun onFailure(call: Call<MessageResponse>, t: Throwable) {
                     if (_binding == null) return
                     Toast.makeText(requireContext(), "Error selesai: ${t.message}", Toast.LENGTH_LONG).show()
+                }
+            })
+    }
+
+    private fun batalkanPesanan(id: Int) {
+        ApiClient.instance.batalkanPesanan(session.getBearerToken(), id)
+            .enqueue(object : Callback<MessageResponse> {
+                override fun onResponse(call: Call<MessageResponse>, response: Response<MessageResponse>) {
+                    if (_binding == null) return
+                    if (response.isSuccessful) {
+                        Toast.makeText(requireContext(), "Pesanan dibatalkan.", Toast.LENGTH_SHORT).show()
+                        loadPesanan()
+                    } else {
+                        Toast.makeText(requireContext(), "Gagal batalkan: ${response.code()}", Toast.LENGTH_LONG).show()
+                    }
+                }
+                override fun onFailure(call: Call<MessageResponse>, t: Throwable) {
+                    if (_binding == null) return
+                    Toast.makeText(requireContext(), "Error batalkan: ${t.message}", Toast.LENGTH_LONG).show()
                 }
             })
     }

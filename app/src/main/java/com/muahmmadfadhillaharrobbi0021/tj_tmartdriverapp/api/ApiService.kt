@@ -6,7 +6,6 @@ import retrofit2.http.*
 
 interface ApiService {
 
-
     @POST("driver/login")
     fun loginDriver(@Body body: LoginRequest): Call<LoginResponse>
 
@@ -27,6 +26,12 @@ interface ApiService {
 
     @POST("driver/pesanan/{id}/update-status")
     fun selesaikanPesanan(
+        @Header("Authorization") token: String,
+        @Path("id") id: Int
+    ): Call<MessageResponse>
+
+    @POST("driver/pesanan/{id}/batalkan")
+    fun batalkanPesanan(
         @Header("Authorization") token: String,
         @Path("id") id: Int
     ): Call<MessageResponse>

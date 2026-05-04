@@ -14,6 +14,7 @@ import java.util.Locale
 class PesananMasukAdapter(
     private val list: List<Pesanan>,
     private val viewMode: Int = VIEW_GESER,
+    private val isActive: Boolean = false,
     private val onAccept: (Pesanan) -> Unit,
     private val onReject: (Pesanan) -> Unit,
     private val onItemClick: (Pesanan) -> Unit
@@ -58,6 +59,16 @@ class PesananMasukAdapter(
         holder.tvHarga.text = nf.format(pesanan.totalHarga)
         holder.tvMetode.text = "Pembayaran: ${pesanan.metodePembayaran ?: "-"}"
         holder.tvStatus.text = pesanan.statusAntar ?: "-"
+
+        if (isActive) {
+            // Pesanan sudah diterima driver ini
+            holder.btnTerima.text = "Pesanan Selesai"
+            holder.btnTolak.text = "Batalkan Pesanan"
+        } else {
+            // Pesanan antrian belum diklaim
+            holder.btnTerima.text = "Terima"
+            holder.btnTolak.text = "Tolak"
+        }
 
         holder.btnTerima.setOnClickListener { onAccept(pesanan) }
         holder.btnTolak.setOnClickListener { onReject(pesanan) }

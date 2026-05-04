@@ -39,7 +39,8 @@ class SessionManager(context: Context) {
     fun getBaseUrl(): String = Constants.BASE_URL.removeSuffix("/api/")
 
     fun rejectPesananLokal(pesananId: Int) {
-        val rejectedIds = getRejectedPesananIds().toMutableSet()
+        val current = pref.getStringSet("rejected_orders", emptySet()) ?: emptySet()
+        val rejectedIds = HashSet<String>(current)
         rejectedIds.add(pesananId.toString())
         pref.edit().putStringSet("rejected_orders", rejectedIds).apply()
     }
