@@ -17,6 +17,7 @@ import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.utils.SessionManager
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import kotlin.String
 
 class LoginActivity : AppCompatActivity() {
 
@@ -63,13 +64,17 @@ class LoginActivity : AppCompatActivity() {
                         val data = response.body()!!
                         if (data.status == "success" && data.token != null) {
                             val user = data.user
+                            android.util.Log.d("LOGIN", "nomorRekening: '${user?.nomorRekening}'")
                             sessionManager.saveSession(
                                 data.token,
                                 user?.id ?: 0,
                                 user?.name ?: "",
                                 user?.email ?: "",
-                                user?.noTelp
+                                user?.noTelp,
+                                user?.nomorRekening
                             )
+
+
                             goToMain()
                         } else {
                             showError("Login gagal. Coba lagi.")

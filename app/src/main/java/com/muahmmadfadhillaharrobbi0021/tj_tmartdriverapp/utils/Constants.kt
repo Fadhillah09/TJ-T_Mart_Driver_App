@@ -13,5 +13,7 @@ object Constants {
     const val KEY_USER_NAME = "user_name"
     const val KEY_USER_EMAIL = "user_email"
     const val KEY_USER_TELP = "user_telp"
+
+    const val KEY_USER_REKENING = "user_rekening"
     const val KEY_IS_LOGIN = "is_logged_in"
 }

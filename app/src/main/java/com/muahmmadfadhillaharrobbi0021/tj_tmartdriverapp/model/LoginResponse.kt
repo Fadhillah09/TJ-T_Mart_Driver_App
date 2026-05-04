@@ -12,6 +12,11 @@ data class LoginResponse(
         val id: Int,
         val name: String,
         val email: String,
-        @SerializedName("no_telp") val noTelp: String?
+
+        @SerializedName("no_telp")
+        val noTelp: String?,
+
+        @SerializedName("nomor_rekening")
+        val nomorRekening: String?
     )
 }
