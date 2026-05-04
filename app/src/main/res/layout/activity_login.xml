@@ -1,49 +1,165 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="20dp">
+    android:background="#FFFFFF"
+    android:padding="24dp">
 
+    <!-- Judul Login -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        android:text="Login"
+        android:textColor="@color/black"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <!-- Logo -->
+    <LinearLayout
+        android:id="@+id/layoutLogo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvTitle"
+        android:layout_marginTop="-20dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="220dp"
+            android:layout_height="220dp"
+            android:contentDescription="Logo"
+            android:src="@drawable/logo"
+            android:scaleType="fitCenter" />
+
+    </LinearLayout>
+
+    <!-- Subjudul -->
+    <TextView
+        android:id="@+id/tvSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/layoutLogo"
+        android:layout_marginTop="-48dp"
+        android:text="Silahkan Masuk Dengan Alamat&#10;Email Dan Password Anda."
+        android:textColor="#808080"
+        android:textSize="16sp" />
+
+    <!-- Email Label -->
+    <TextView
+        android:id="@+id/tvEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvSubtitle"
+        android:layout_marginTop="48dp"
+        android:text="Alamat Email"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <!-- Email Input -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/layoutEmail"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
-        android:hint="Email">
+        android:layout_below="@id/tvEmail"
+        android:layout_marginTop="6dp"
+        app:boxBackgroundColor="#E8E8E8"
+        app:boxStrokeWidth="0dp"
+        app:boxStrokeWidthFocused="0dp">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textEmailAddress" />
+            android:inputType="textEmailAddress"
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:background="@null" />
+
     </com.google.android.material.textfield.TextInputLayout>
 
+    <!-- Password Label -->
+    <TextView
+        android:id="@+id/tvPassword"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/layoutEmail"
+        android:layout_marginTop="16dp"
+        android:text="Password"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <!-- Password Input -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/layoutPassword"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/layoutEmail"
-        android:layout_marginTop="10dp"
-        android:hint="Password"
+        android:layout_below="@id/tvPassword"
+        android:layout_marginTop="6dp"
+        app:boxBackgroundColor="#E8E8E8"
+        app:boxStrokeWidth="0dp"
+        app:boxStrokeWidthFocused="0dp"
         app:passwordToggleEnabled="true">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textPassword" />
+            android:inputType="textPassword"
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:background="@null" />
+
     </com.google.android.material.textfield.TextInputLayout>
 
-    <Button
+    <!-- Minimal 8 Karakter -->
+    <TextView
+        android:id="@+id/tvMinChar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/layoutPassword"
+        android:layout_marginTop="4dp"
+        android:text="Minimal 8 Karakter"
+        android:textColor="#808080"
+        android:textSize="12sp" />
+
+    <!-- Lupa Password -->
+    <TextView
+        android:id="@+id/tvLupaPassword"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvMinChar"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="8dp"
+        android:text="Lupa Password"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <!-- Tombol Login -->
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnLogin"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_below="@id/layoutPassword"
-        android:layout_marginTop="20dp"
-        android:text="Login" />
+        android:layout_height="56dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/bg_button_login"
+        android:text="Login"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold" />
 
     <ProgressBar
         android:id="@+id/progressBar"

@@ -4,21 +4,67 @@
     android:layout_height="match_parent"
     android:background="@color/white">
 
-    <ImageView
-        android:id="@+id/imgLogo"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:src="@mipmap/ic_launcher" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/btnMulai"
+        <ImageView
+            android:layout_width="320dp"
+            android:layout_height="320dp"
+            android:src="@drawable/logo"
+            android:contentDescription="Logo" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:orientation="vertical">
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Panel merah bawah -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_margin="30dp"
-        android:text="Mulai Sekarang"
-        android:textAllCaps="false"
-        android:textSize="18sp" />
+        android:background="@drawable/bg_bottom_panel"
+        android:orientation="vertical"
+        android:padding="28dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Antar lebih cepat,\npenghasilan lebih banyak!"
+            android:textColor="@color/white"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:text="Bergabung sebagai driver TJ T-Mart dan mulai cuan hari ini."
+            android:textColor="@color/white"
+            android:textSize="14sp" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnMulai"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/bg_button_white"
+            android:text="Mulai"
+            android:textAllCaps="false"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
 
 </RelativeLayout>
