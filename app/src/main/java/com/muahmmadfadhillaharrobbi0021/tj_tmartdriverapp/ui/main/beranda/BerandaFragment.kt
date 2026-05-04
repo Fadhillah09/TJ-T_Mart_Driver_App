@@ -30,6 +30,13 @@ class BerandaFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var session: SessionManager
 
+    // State tampilan: true = geser (horizontal), false = bawah (vertikal)
+    private var isViewGeser = true
+
+    // Simpan list pesanan terakhir agar bisa di-render ulang saat toggle
+    private var currentPesananList: List<Pesanan> = emptyList()
+    private var currentIsActive: Boolean = false
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentBerandaBinding.inflate(inflater, container, false)
         return binding.root
@@ -41,18 +48,14 @@ class BerandaFragment : Fragment() {
 
         binding.tvNamaDriver.text = "Halo ${session.getUserName()}!"
 
-        // Setup RecyclerView Riwayat
         binding.rvRiwayat.layoutManager = LinearLayoutManager(requireContext())
         binding.rvRiwayat.isNestedScrollingEnabled = false
 
-        // Setup RecyclerView Pesanan Masuk (Antrian)
-        binding.rvPesananMasuk.layoutManager = LinearLayoutManager(requireContext())
-        binding.rvPesananMasuk.isNestedScrollingEnabled = false
+        applyLayoutManager()
 
         binding.swipeRefresh.setColorSchemeResources(android.R.color.holo_red_dark)
         binding.swipeRefresh.setOnRefreshListener { loadAllData() }
 
-        // Navigasi ke ProfilFragment
         binding.layoutAvatar.setOnClickListener {
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, ProfilFragment())
@@ -60,7 +63,6 @@ class BerandaFragment : Fragment() {
                 .commit()
         }
 
-        // Navigasi ke NotifikasiFragment
         binding.ivNotifikasi.setOnClickListener {
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, NotifikasiFragment())
@@ -68,7 +70,57 @@ class BerandaFragment : Fragment() {
                 .commit()
         }
 
+        // Tombol Toggle
+        binding.btnViewGeser.setOnClickListener {
+            if (!isViewGeser) {
+                isViewGeser = true
+                updateToggleUI()
+                applyLayoutManager()
+                if (currentPesananList.isNotEmpty()) tampilkanDaftar(currentPesananList, currentIsActive)
+            }
+        }
+
+        binding.btnViewBawah.setOnClickListener {
+            if (isViewGeser) {
+                isViewGeser = false
+                updateToggleUI()
+                applyLayoutManager()
+                if (currentPesananList.isNotEmpty()) tampilkanDaftar(currentPesananList, currentIsActive)
+            }
+        }
+
+        updateToggleUI()
         loadAllData()
+    }
+
+    private fun applyLayoutManager() {
+        if (isViewGeser) {
+            binding.rvPesananMasuk.layoutManager = LinearLayoutManager(
+                requireContext(), LinearLayoutManager.HORIZONTAL, false
+            )
+        } else {
+            binding.rvPesananMasuk.layoutManager = LinearLayoutManager(requireContext())
+        }
+        binding.rvPesananMasuk.isNestedScrollingEnabled = false
+    }
+
+    /**
+     * Update visual segmented toggle:
+     * - Pilihan aktif: background merah, ikon putih
+     * - Pilihan tidak aktif: background transparan, ikon abu
+     */
+    private fun updateToggleUI() {
+        if (isViewGeser) {
+            binding.btnViewGeser.setBackgroundResource(R.drawable.bg_toggle_selected)
+            binding.btnViewGeser.setColorFilter(requireContext().getColor(android.R.color.white))
+            binding.btnViewBawah.setBackgroundResource(android.R.color.transparent)
+            binding.btnViewBawah.setColorFilter(requireContext().getColor(android.R.color.darker_gray))
+        } else {
+            binding.btnViewBawah.setBackgroundResource(R.drawable.bg_toggle_selected)
+            binding.btnViewBawah.setColorFilter(requireContext().getColor(android.R.color.white))
+            binding.btnViewGeser.setBackgroundResource(android.R.color.transparent)
+            binding.btnViewGeser.setColorFilter(requireContext().getColor(android.R.color.darker_gray))
+        }
     }
 
     private fun loadAllData() {
@@ -88,21 +140,16 @@ class BerandaFragment : Fragment() {
                         val list = response.body()?.data ?: emptyList()
                         val myId = session.getUserId()
 
-                        // 1. Cari pesanan yang sedang SAYA antar
                         val pesananAktif = list.find {
                             it.kurirId == myId && it.statusAntar?.lowercase() == "sedang diantar"
                         }
 
                         if (pesananAktif != null) {
-                            // Jika ada pesanan aktif, tetap tampilkan di daftar "Pesanan Masuk"
-                            // tapi kita kirim flag isActive = true agar tombolnya berubah
                             tampilkanDaftar(listOf(pesananAktif), isActive = true)
                         } else {
-                            // 2. Jika tidak ada pesanan aktif, tampilkan antrian pesanan umum (kurirId NULL)
                             val antrian = list.filter {
                                 it.statusAntar?.lowercase() == "diproses" && it.kurirId == null
                             }
-
                             if (antrian.isNotEmpty()) {
                                 tampilkanDaftar(antrian, isActive = false)
                             } else {
@@ -111,16 +158,22 @@ class BerandaFragment : Fragment() {
                         }
                     }
                 }
-                override fun onFailure(call: Call<PesananResponse>, t: Throwable) { /* ... */ }
+                override fun onFailure(call: Call<PesananResponse>, t: Throwable) { }
             })
     }
 
-    // Fungsi pembantu agar kode lebih rapi
     private fun tampilkanDaftar(list: List<Pesanan>, isActive: Boolean) {
+        currentPesananList = list
+        currentIsActive = isActive
+
         binding.rvPesananMasuk.visibility = View.VISIBLE
         binding.layoutPesananKosong.visibility = View.GONE
+
+        applyLayoutManager()
+
         binding.rvPesananMasuk.adapter = PesananMasukAdapter(
             list = list,
+            viewMode = if (isViewGeser) PesananMasukAdapter.VIEW_GESER else PesananMasukAdapter.VIEW_BAWAH,
             onAccept = { pesanan ->
                 if (isActive) selesaikanPesanan(pesanan.id) else claimPesanan(pesanan.id)
             },
@@ -133,20 +186,20 @@ class BerandaFragment : Fragment() {
     }
 
     private fun tampilKosong() {
+        currentPesananList = emptyList()
         binding.rvPesananMasuk.visibility = View.GONE
         binding.layoutPesananKosong.visibility = View.VISIBLE
     }
+
     private fun bukaDetailPesanan(pesanan: Pesanan) {
         val detailFragment = DetailPesananFragment.newInstance(pesanan.id)
         parentFragmentManager.beginTransaction()
             .setCustomAnimations(
-                android.R.anim.fade_in,
-                android.R.anim.fade_out,
-                android.R.anim.fade_in,
-                android.R.anim.fade_out
+                android.R.anim.fade_in, android.R.anim.fade_out,
+                android.R.anim.fade_in, android.R.anim.fade_out
             )
             .replace(R.id.fragmentContainer, detailFragment)
-            .addToBackStack(null) // Agar tombol back berfungsi
+            .addToBackStack(null)
             .commit()
     }
 
@@ -159,7 +212,6 @@ class BerandaFragment : Fragment() {
                         Toast.makeText(requireContext(), "Pesanan diterima!", Toast.LENGTH_SHORT).show()
                         loadPesanan()
                     } else if (response.code() == 409) {
-                        // Berikan pesan yang lebih manusiawi
                         Toast.makeText(requireContext(), "Yah, pesanan sudah diambil driver lain!", Toast.LENGTH_LONG).show()
                         loadPesanan()
                     } else {
@@ -215,22 +267,10 @@ class BerandaFragment : Fragment() {
                 override fun onResponse(call: Call<PesananResponse>, response: Response<PesananResponse>) {
                     if (_binding == null) return
                     if (response.isSuccessful && response.body() != null) {
-
-                        // 1. Ambil daftar ID yang ditolak lokal (agar tidak muncul di riwayat juga)
                         val rejectedLocalIds = session.getRejectedPesananIds()
-
                         val listRaw = response.body()?.data ?: emptyList()
-
-                        // 2. Filter data riwayat: Buang pesanan yang ID-nya ada di daftar tolak lokal
                         val listRiwayatFiltered = listRaw.filter { it.id.toString() !in rejectedLocalIds }
-
-                        // 3. Tampilkan hanya data yang sudah difilter
-                        if (listRiwayatFiltered.isNotEmpty()) {
-                            binding.rvRiwayat.adapter = RiwayatAdapter(listRiwayatFiltered)
-                        } else {
-                            // Opsional: Jika hasil filter kosong, kosongkan adapter
-                            binding.rvRiwayat.adapter = RiwayatAdapter(emptyList())
-                        }
+                        binding.rvRiwayat.adapter = RiwayatAdapter(listRiwayatFiltered)
                     }
                 }
                 override fun onFailure(call: Call<PesananResponse>, t: Throwable) {

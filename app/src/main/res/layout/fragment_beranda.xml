@@ -20,6 +20,7 @@
             android:paddingTop="16dp"
             android:paddingBottom="16dp">
 
+            <!-- Header: Nama + Notif + Avatar -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -77,14 +78,57 @@
 
             </LinearLayout>
 
-            <TextView
-                android:layout_width="wrap_content"
+            <!-- Baris: "Pesanan masuk" + Segmented Toggle -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Pesanan masuk"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="#000000"
-                android:layout_marginBottom="8dp" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Pesanan masuk"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#000000" />
+
+                <!-- Segmented Toggle: 1 container, 2 pilihan -->
+                <LinearLayout
+                    android:id="@+id/layoutToggleView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:orientation="horizontal"
+                    android:background="@drawable/bg_toggle_container"
+                    android:padding="3dp">
+
+                    <!-- Pilihan GESER (kiri) - 2 kartu sejajar -->
+                    <ImageButton
+                        android:id="@+id/btnViewGeser"
+                        android:layout_width="36dp"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_view_geser"
+                        android:background="@drawable/bg_toggle_selected"
+                        android:padding="6dp"
+                        android:contentDescription="Tampilan geser"
+                        app:tint="#FFFFFF" />
+
+                    <!-- Pilihan BAWAH (kanan) - 3 garis list -->
+                    <ImageButton
+                        android:id="@+id/btnViewBawah"
+                        android:layout_width="36dp"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_view_bawah"
+                        android:background="@android:color/transparent"
+                        android:padding="6dp"
+                        android:contentDescription="Tampilan ke bawah"
+                        app:tint="#888888" />
+
+                </LinearLayout>
+
+            </LinearLayout>
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/layoutPesananKosong"
@@ -112,7 +156,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:nestedScrollingEnabled="false"
-                android:visibility="gone" />
+                android:visibility="gone"
+                android:clipToPadding="false" />
 
             <TextView
                 android:layout_width="wrap_content"
