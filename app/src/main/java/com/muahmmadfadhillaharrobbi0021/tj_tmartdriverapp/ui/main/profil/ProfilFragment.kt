@@ -125,6 +125,7 @@ class ProfilFragment : Fragment() {
                     withContext(Dispatchers.Main) {
 
                         if (!fotoUrl.isNullOrEmpty()) {
+                            sessionManager.saveFotoProfil(fotoUrl) // ← TAMBAHAN 1
                             Glide.with(requireContext())
                                 .load(fotoUrl)
                                 .placeholder(R.drawable.ic_back)
@@ -213,6 +214,7 @@ class ProfilFragment : Fragment() {
             if (response.isSuccessful) {
                 val json    = JSONObject(body)
                 val fotoUrl = json.getString("foto_url")
+                sessionManager.saveFotoProfil(fotoUrl) // ← TAMBAHAN 2
                 Glide.with(requireContext())
                     .load(fotoUrl)
                     .circleCrop()

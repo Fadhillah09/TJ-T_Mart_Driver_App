@@ -8,7 +8,9 @@ import android.view.ViewGroup
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.R
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.api.ApiClient
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.databinding.FragmentBerandaBinding
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.MessageResponse
@@ -18,6 +20,9 @@ import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.PesananResponse
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main.notifikasi.NotifikasiFragment
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main.profil.ProfilFragment
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.utils.SessionManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -47,6 +52,8 @@ class BerandaFragment : Fragment() {
         session = SessionManager(requireContext())
 
         binding.tvNamaDriver.text = "Halo ${session.getUserName()}!"
+
+        loadFotoProfil()
 
         binding.rvRiwayat.layoutManager = LinearLayoutManager(requireContext())
         binding.rvRiwayat.isNestedScrollingEnabled = false
@@ -91,6 +98,64 @@ class BerandaFragment : Fragment() {
 
         updateToggleUI()
         loadAllData()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadFotoProfil()
+    }
+
+    private fun loadFotoProfil() {
+        if (_binding == null) return
+
+        // Tampilkan dari cache dulu kalau ada
+        val cachedUrl = session.getFotoProfil()
+        if (cachedUrl.isNotEmpty()) {
+            Glide.with(this)
+                .load(cachedUrl)
+                .circleCrop()
+                .into(binding.ivAvatar)
+        } else {
+            binding.ivAvatar.setImageResource(android.R.drawable.ic_menu_myplaces)
+        }
+
+        // Fetch dari server untuk update terbaru
+        val token = session.getToken()
+        val baseUrl = session.getBaseUrl()
+
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val client = okhttp3.OkHttpClient()
+                val request = okhttp3.Request.Builder()
+                    .url("$baseUrl/api/driver/profile")
+                    .get()
+                    .addHeader("Authorization", "Bearer $token")
+                    .addHeader("Accept", "application/json")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val body = response.body?.string() ?: return@launch
+
+                if (response.isSuccessful) {
+                    val json = org.json.JSONObject(body)
+                    val data = json.getJSONObject("data")
+                    val fotoUrl = if (data.isNull("foto_url")) null else data.getString("foto_url")
+
+                    if (!fotoUrl.isNullOrEmpty()) {
+                        session.saveFotoProfil(fotoUrl)
+                        withContext(Dispatchers.Main) {
+                            if (_binding == null) return@withContext
+                            Glide.with(this@BerandaFragment)
+                                .load(fotoUrl)
+                                .circleCrop()
+                                .into(binding.ivAvatar)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     private fun applyLayoutManager() {

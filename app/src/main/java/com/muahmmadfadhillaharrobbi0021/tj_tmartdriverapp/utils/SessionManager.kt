@@ -38,6 +38,13 @@ class SessionManager(context: Context) {
 
     fun getBaseUrl(): String = Constants.BASE_URL.removeSuffix("/api/")
 
+    fun saveFotoProfil(url: String) {
+        editor.putString("foto_profil", url)
+        editor.apply()
+    }
+
+    fun getFotoProfil(): String = pref.getString("foto_profil", "") ?: ""
+
     fun rejectPesananLokal(pesananId: Int) {
         val current = pref.getStringSet("rejected_orders", emptySet()) ?: emptySet()
         val rejectedIds = HashSet<String>(current)
