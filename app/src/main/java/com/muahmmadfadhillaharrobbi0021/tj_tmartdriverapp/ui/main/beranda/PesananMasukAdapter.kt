@@ -45,6 +45,14 @@ class PesananMasukAdapter(
             R.layout.item_pesanan_masuk
         }
         val view = LayoutInflater.from(parent.context).inflate(layoutRes, parent, false)
+
+        // Saat mode geser tapi pesanan aktif → card full width
+        if (viewType == VIEW_GESER && isActive) {
+            val params = view.layoutParams
+            params.width = ViewGroup.LayoutParams.MATCH_PARENT
+            view.layoutParams = params
+        }
+
         return ViewHolder(view)
     }
 
@@ -62,7 +70,7 @@ class PesananMasukAdapter(
 
         if (isActive) {
             holder.btnTerima.text = "Pesanan Selesai"
-            holder.btnTolak.text = "Batalkan Pesanan"
+            holder.btnTolak.text = "Batalkan"
         } else {
             holder.btnTerima.text = "Terima"
             holder.btnTolak.text = "Tolak"

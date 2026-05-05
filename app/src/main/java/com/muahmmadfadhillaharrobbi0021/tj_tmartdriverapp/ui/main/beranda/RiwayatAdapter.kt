@@ -24,34 +24,27 @@ class RiwayatAdapter(private val list: List<Pesanan>) :
         val context = holder.itemView.context
 
         with(holder.binding) {
-            // Tampilkan Nama Pelanggan
             tvNamaPelanggan.text = pesanan.user?.name ?: "Pelanggan"
 
-            // Format Total Harga ke Rupiah
             val nf = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
             nf.maximumFractionDigits = 0
             tvTotalHarga.text = nf.format(pesanan.totalHarga)
 
-            // Karena ini di Beranda, Sembunyikan tombol eksekusi
             btnSelesaikan.visibility = android.view.View.GONE
 
             when (pesanan.statusAntar?.lowercase()) {
-                "sedang diantar" -> {
-                    tvStatus.text = "Belum selesai"
-                    tvStatus.setTextColor(context.getColor(android.R.color.holo_red_dark))
-                    // Sesuaikan dengan nama file di gambar kamu
-                    tvStatus.setBackgroundResource(R.drawable.bg_badge_belum_selesai)
-                }
                 "selesai" -> {
                     tvStatus.text = "Selesai"
                     tvStatus.setTextColor(context.getColor(android.R.color.holo_green_dark))
-                    // Sesuaikan dengan nama file di gambar kamu
                     tvStatus.setBackgroundResource(R.drawable.bg_badge_selesai)
                 }
                 "dibatalkan" -> {
                     tvStatus.text = "Dibatalkan"
-                    tvStatus.setTextColor(context.getColor(android.R.color.darker_gray))
-                    // Karena bg_badge_batal tidak ada, gunakan badge belum selesai dulu
+                    tvStatus.setTextColor(context.getColor(android.R.color.holo_red_dark))
+                    tvStatus.setBackgroundResource(R.drawable.bg_badge_dibatalkan)
+                }
+                else -> {
+                    tvStatus.text = pesanan.statusAntar ?: "-"
                     tvStatus.setBackgroundResource(R.drawable.bg_badge_belum_selesai)
                 }
             }

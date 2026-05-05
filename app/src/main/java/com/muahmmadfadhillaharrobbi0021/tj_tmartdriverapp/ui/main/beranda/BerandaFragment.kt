@@ -35,10 +35,7 @@ class BerandaFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var session: SessionManager
 
-    // State tampilan: true = geser (horizontal), false = bawah (vertikal)
     private var isViewGeser = true
-
-    // Simpan list pesanan terakhir agar bisa di-render ulang saat toggle
     private var currentPesananList: List<Pesanan> = emptyList()
     private var currentIsActive: Boolean = false
 
@@ -77,7 +74,6 @@ class BerandaFragment : Fragment() {
                 .commit()
         }
 
-        // Tombol Toggle
         binding.btnViewGeser.setOnClickListener {
             if (!isViewGeser) {
                 isViewGeser = true
@@ -108,7 +104,6 @@ class BerandaFragment : Fragment() {
     private fun loadFotoProfil() {
         if (_binding == null) return
 
-        // Tampilkan dari cache dulu kalau ada
         val cachedUrl = session.getFotoProfil()
         if (cachedUrl.isNotEmpty()) {
             Glide.with(this)
@@ -119,7 +114,6 @@ class BerandaFragment : Fragment() {
             binding.ivAvatar.setImageResource(android.R.drawable.ic_menu_myplaces)
         }
 
-        // Fetch dari server untuk update terbaru
         val token = session.getToken()
         val baseUrl = session.getBaseUrl()
 
@@ -205,6 +199,8 @@ class BerandaFragment : Fragment() {
                         }
 
                         if (pesananAktif != null) {
+                            isViewGeser = false
+                            updateToggleUI()
                             tampilkanDaftar(listOf(pesananAktif), isActive = true)
                         } else {
                             val rejectedIds = session.getRejectedPesananIds()
@@ -220,7 +216,10 @@ class BerandaFragment : Fragment() {
                         }
                     }
                 }
-                override fun onFailure(call: Call<PesananResponse>, t: Throwable) { }
+                override fun onFailure(call: Call<PesananResponse>, t: Throwable) {
+                    if (_binding == null) return
+                    binding.swipeRefresh.isRefreshing = false
+                }
             })
     }
 
@@ -317,7 +316,7 @@ class BerandaFragment : Fragment() {
                     if (_binding == null) return
                     if (response.isSuccessful) {
                         Toast.makeText(requireContext(), "Pesanan dibatalkan.", Toast.LENGTH_SHORT).show()
-                        loadPesanan()
+                        loadAllData()
                     } else {
                         Toast.makeText(requireContext(), "Gagal batalkan: ${response.code()}", Toast.LENGTH_LONG).show()
                     }
@@ -352,10 +351,8 @@ class BerandaFragment : Fragment() {
                 override fun onResponse(call: Call<PesananResponse>, response: Response<PesananResponse>) {
                     if (_binding == null) return
                     if (response.isSuccessful && response.body() != null) {
-                        val rejectedLocalIds = session.getRejectedPesananIds()
                         val listRaw = response.body()?.data ?: emptyList()
-                        val listRiwayatFiltered = listRaw.filter { it.id.toString() !in rejectedLocalIds }
-                        binding.rvRiwayat.adapter = RiwayatAdapter(listRiwayatFiltered)
+                        binding.rvRiwayat.adapter = RiwayatAdapter(listRaw)
                     }
                 }
                 override fun onFailure(call: Call<PesananResponse>, t: Throwable) {
