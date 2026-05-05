@@ -55,17 +55,15 @@ class PesananMasukAdapter(
 
         holder.tvId.text = "${pesanan.id}"
         holder.tvNama.text = pesanan.user?.name ?: "Pelanggan"
-        holder.tvAlamat.text = pesanan.user?.getNamaLokasiLengkap() ?: "-"
+        holder.tvAlamat.text = pesanan.alamatDisplay ?: pesanan.user?.getNamaLokasiLengkap() ?: "-"
         holder.tvHarga.text = nf.format(pesanan.totalHarga)
-        holder.tvMetode.text = "Pembayaran: ${pesanan.metodePembayaran ?: "-"}"
+        holder.tvMetode.text = "Pembayaran: ${pesanan.pembayaranDisplay ?: pesanan.metodePembayaran ?: "-"}"
         holder.tvStatus.text = pesanan.statusAntar ?: "-"
 
         if (isActive) {
-            // Pesanan sudah diterima driver ini
             holder.btnTerima.text = "Pesanan Selesai"
             holder.btnTolak.text = "Batalkan Pesanan"
         } else {
-            // Pesanan antrian belum diklaim
             holder.btnTerima.text = "Terima"
             holder.btnTolak.text = "Tolak"
         }

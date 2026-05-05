@@ -13,7 +13,9 @@ data class Pesanan(
     @SerializedName("metode_pembayaran") val metodePembayaran: String?,
     @SerializedName("created_at") val createdAt: String?,
     val user: UserPemesan?,
-    @SerializedName("details") val details: List<ItemPesanan>?
+    @SerializedName("details") val details: List<ItemPesanan>?,
+    @SerializedName("alamat_display") val alamatDisplay: String?,
+@SerializedName("pembayaran_display") val pembayaranDisplay: String?
 ) {
     data class ItemPesanan(
         @SerializedName("nama_produk") val namaProduk: String?,
