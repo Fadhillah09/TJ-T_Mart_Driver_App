@@ -20,8 +20,10 @@ data class Pesanan(
     data class ItemPesanan(
         @SerializedName("nama_produk") val namaProduk: String?,
         val qty: Int?,
+        val jumlah: Int?,
         @SerializedName("harga_satuan") val harga: Int?,
-        val subtotal: Int?
+        val subtotal: Int?,
+        @SerializedName("foto_produk") val fotoProduk: String?
     )
     data class UserPemesan(
         val name: String?,
