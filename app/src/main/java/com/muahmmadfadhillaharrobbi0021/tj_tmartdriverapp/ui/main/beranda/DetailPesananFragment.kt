@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.R
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -53,9 +54,11 @@ class DetailPesananFragment : Fragment() {
         fetchDetailPesanan()
 
         binding.btnDiantar.setOnClickListener {
-            // Logika ketika tombol diantar ditekan
-            Toast.makeText(requireContext(), "Pesanan sedang dalam pengantaran", Toast.LENGTH_SHORT).show()
-            // Di sini kamu bisa arahkan ke fragment berikutnya jika ada
+            val anterFragment = AnterPesananFragment.newInstance(pesananId)
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, anterFragment)
+                .addToBackStack("AnterPesanan")
+                .commit()
         }
     }
 
@@ -82,27 +85,63 @@ class DetailPesananFragment : Fragment() {
         val nf = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
         nf.maximumFractionDigits = 0
 
+        if (_binding == null) return // Cek binding lagi untuk keamanan
+
         with(binding) {
-            tvNamaPembeli.text = pesanan.user?.name ?: "Pelanggan"
-            tvAlamatGedung.text = pesanan.user?.getNamaLokasiLengkap() ?: "Alamat tidak tersedia"
+            tvNamaPembeli.text = pesanan.user?.name ?: "Pelanggan Tanpa Nama"
+
+            // Perbaikan logika alamat agar tidak kosong sama sekali
+            val alamatFix = pesanan.alamatDisplay
+                ?: pesanan.user?.getNamaLokasiLengkap()
+                ?: "Alamat tidak tersedia"
+
+            tvAlamatGedung.text = alamatFix
             tvMetodePembayaran.text = "Metode: ${pesanan.metodePembayaran ?: "Cash"}"
             tvTotalHarga.text = "Total: ${nf.format(pesanan.totalHarga ?: 0)}"
 
-            // Setup RecyclerView untuk Item yang dibeli
-            pesanan.details?.let { items ->
-                rvItemPesanan.layoutManager = LinearLayoutManager(requireContext())
-                rvItemPesanan.adapter = ItemDetailAdapter(items)
-            }
+            // Ambil nama gedung untuk koordinat map
+            val namaGedung = alamatFix.split(",").firstOrNull()?.trim() ?: "Gedung 5"
 
-            // Logika Klik Maps berdasarkan koordinat asrama
-            btnOpenMaps.setOnClickListener {
-                openGoogleMaps(pesanan.user?.alamatGedung ?: "")
+            setupWebView(namaGedung)
+
+            // Item Pesanan
+            pesanan.details?.let { items ->
+                if (items.isNotEmpty()) {
+                    rvItemPesanan.layoutManager = LinearLayoutManager(requireContext())
+                    rvItemPesanan.adapter = ItemDetailAdapter(items)
+                } else {
+                    // Tampilkan pesan jika detail item kosong[cite: 1]
+                    Toast.makeText(requireContext(), "Item pesanan kosong", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
 
+    // Pisahkan fungsi WebView agar kode lebih rapi
+    private fun setupWebView(namaGedung: String) {
+        val coords = getCoords(namaGedung)
+        val (lat, lng) = coords.split(",")
+
+        val html = """
+        <html>
+        <body style="margin:0;padding:0;">
+            <iframe width="100%" height="100%" frameborder="0" style="border:0" 
+                src="https://maps.google.com/maps?q=$lat,$lng&z=18&output=embed">
+            </iframe>
+        </body>
+        </html>
+    """.trimIndent()
+
+        binding.webViewMap.settings.apply {
+            javaScriptEnabled = true
+            domStorageEnabled = true
+            loadWithOverviewMode = true
+            useWideViewPort = true
+        }
+        binding.webViewMap.loadDataWithBaseURL("https://www.google.com", html, "text/html", "UTF-8", null)
+    }
+
     private fun openGoogleMaps(gedungName: String) {
-        // Data koordinat sesuai dengan informasi yang kamu berikan
         val coords = when (gedungName) {
             "Gedung 1" -> "-6.9710403,107.6283141"
             "Gedung 2" -> "-6.9707509,107.6283404"
@@ -122,10 +161,9 @@ class DetailPesananFragment : Fragment() {
             "Gedung D" -> "-6.9728527,107.6286204"
             "Gedung E" -> "-6.9725544,107.6286242"
             "Gedung F" -> "-6.9720839,107.6286579"
-            else -> "-6.9706729,107.627767" // Default Gedung 5
+            else -> "-6.9706729,107.627767"
         }
 
-        // Gunakan mode navigasi agar kurir langsung diarahkan jalannya
         val gmmIntentUri = Uri.parse("google.navigation:q=$coords")
         val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
         mapIntent.setPackage("com.google.android.apps.maps")
@@ -136,6 +174,29 @@ class DetailPesananFragment : Fragment() {
             // Jika tidak ada app Maps, buka browser
             val webUri = Uri.parse("https://www.google.com/maps/dir/?api=1&destination=$coords")
             startActivity(Intent(Intent.ACTION_VIEW, webUri))
+        }
+    }
+    private fun getCoords(gedungName: String): String {
+        return when (gedungName) {
+            "Gedung 1" -> "-6.9710403,107.6283141"
+            "Gedung 2" -> "-6.9707509,107.6283404"
+            "Gedung 3" -> "-6.9704344,107.6283533"
+            "Gedung 4" -> "-6.9709904,107.6277174"
+            "Gedung 5" -> "-6.9706729,107.627767"
+            "Gedung 6" -> "-6.970935,107.6271111"
+            "Gedung 7" -> "-6.9706223,107.6271815"
+            "Gedung 8" -> "-6.9702831,107.6272323"
+            "Gedung 9" -> "-6.9700347,107.6277742"
+            "Gedung 10" -> "-6.9697409,107.6278167"
+            "Gedung 11" -> "-6.9700978,107.6283584"
+            "Gedung 12" -> "-6.9697555,107.6283976"
+            "Gedung A" -> "-6.9740468,107.6285963"
+            "Gedung B" -> "-6.9736757,107.6286558"
+            "Gedung C" -> "-6.9732535,107.6287044"
+            "Gedung D" -> "-6.9728527,107.6286204"
+            "Gedung E" -> "-6.9725544,107.6286242"
+            "Gedung F" -> "-6.9720839,107.6286579"
+            else -> "-6.9706729,107.627767"
         }
     }
 

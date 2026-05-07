@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -16,13 +15,15 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_centerVertical="true"
-            android:src="@drawable/ic_back" /> <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:text="Detail Pesanan"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+            android:src="@drawable/ic_back" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Detail Pesanan"
+            android:textSize="18sp"
+            android:textStyle="bold" />
     </RelativeLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -75,8 +76,8 @@
                 android:id="@+id/rvItemPesanan"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                android:nestedScrollingEnabled="false" />
 
             <TextView
                 android:id="@+id/tvTotalHarga"
@@ -101,31 +102,16 @@
                 android:text="Lokasi Pengantaran"
                 android:textStyle="bold" />
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/btnOpenMaps"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:layout_marginTop="8dp"
-                app:cardCornerRadius="12dp">
+                android:layout_height="200dp"
+                android:layout_marginTop="8dp">
 
-                <FrameLayout
+                <WebView
+                    android:id="@+id/webViewMap"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="#F5F5F5">
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_location_on" /> <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom|center_horizontal"
-                    android:layout_marginBottom="8dp"
-                    android:text="Klik untuk buka di Google Maps"
-                    android:textSize="12sp" />
-                </FrameLayout>
-            </androidx.cardview.widget.CardView>
+                    android:layout_height="match_parent" />
+            </FrameLayout>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
@@ -134,7 +120,10 @@
         android:id="@+id/btnDiantar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="35dp"
         android:text="Pesanan Diantar"
         android:backgroundTint="@color/red" />
 
