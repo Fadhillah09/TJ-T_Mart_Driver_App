@@ -52,7 +52,7 @@ interface ApiService {
     fun getRiwayat(@Header("Authorization") token: String): Call<PesananResponse>
 
     @Headers("Accept: application/json")
-    @PATCH("pesanan/{id}/status-antar")
+    @POST("driver/pesanan/{id}/status-antar")
     fun updateStatusAntar(
         @Header("Authorization") token: String,
         @Path("id") id: Int,
@@ -70,5 +70,4 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Field("koordinat") koordinat: String
     ): Call<MessageResponse>
-
 }
