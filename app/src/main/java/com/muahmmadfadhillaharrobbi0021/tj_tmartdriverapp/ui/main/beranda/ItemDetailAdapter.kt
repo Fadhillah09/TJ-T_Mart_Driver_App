@@ -26,6 +26,8 @@ class ItemDetailAdapter(private val items: List<Pesanan.ItemPesanan>) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
+        android.util.Log.d("FOTO_PRODUK", "foto: ${item.fotoProduk}")
+        android.util.Log.d("FOTO_PRODUK", "url: ${Constants.BASE_URL}storage/${item.fotoProduk}")
         val nf = NumberFormat.getCurrencyInstance(Locale("id", "ID")).apply {
             maximumFractionDigits = 0
         }
@@ -39,8 +41,10 @@ class ItemDetailAdapter(private val items: List<Pesanan.ItemPesanan>) :
 
             val fotoUrl = item.fotoProduk
             if (!fotoUrl.isNullOrBlank()) {
+                val namaFile = fotoUrl.substringAfterLast("/")
                 Glide.with(ivFotoProduk.context)
-                    .load("${Constants.BASE_URL}storage/$fotoUrl")
+
+                    .load("${Constants.BASE_URL}produk_assets/$namaFile")
                     .placeholder(R.drawable.ic_placeholder_product)
                     .error(R.drawable.ic_placeholder_product)
                     .centerCrop()

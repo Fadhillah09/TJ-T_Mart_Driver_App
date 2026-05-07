@@ -30,6 +30,7 @@ data class Pesanan(
         @SerializedName("no_telp") val noTelp: String?,
         @SerializedName("alamat_gedung") val alamatGedung: String?,
         @SerializedName("nomor_kamar") val nomorKamar: String?,
+        val gambar: String?,
         val lokasi: LokasiData?
     ) {
         fun getNamaLokasiLengkap(): String {

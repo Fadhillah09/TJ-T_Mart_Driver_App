@@ -3,6 +3,7 @@ package com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main.beranda
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import com.bumptech.glide.Glide
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +15,7 @@ import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.api.ApiClient
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.databinding.FragmentDetailPesananBinding
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.Pesanan
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.PesananResponse
+import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.utils.Constants
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.utils.SessionManager
 import retrofit2.Call
 import retrofit2.Callback
@@ -85,32 +87,46 @@ class DetailPesananFragment : Fragment() {
         val nf = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
         nf.maximumFractionDigits = 0
 
-        if (_binding == null) return // Cek binding lagi untuk keamanan
+        if (_binding == null) return
 
         with(binding) {
             tvNamaPembeli.text = pesanan.user?.name ?: "Pelanggan Tanpa Nama"
 
-            // Perbaikan logika alamat agar tidak kosong sama sekali
+            val fotoUser = pesanan.user?.gambar
+            if (!fotoUser.isNullOrBlank()) {
+                Glide.with(this@DetailPesananFragment)
+                    .load("${Constants.BASE_URL}storage/$fotoUser")
+                    .placeholder(R.drawable.ic_person)
+                    .error(R.drawable.ic_person)
+                    .circleCrop()
+                    .into(ivFotoPembeli)
+            }
+
             val alamatFix = pesanan.alamatDisplay
                 ?: pesanan.user?.getNamaLokasiLengkap()
                 ?: "Alamat tidak tersedia"
 
             tvAlamatGedung.text = alamatFix
             tvMetodePembayaran.text = "Metode: ${pesanan.metodePembayaran ?: "Cash"}"
-            tvTotalHarga.text = "Total: ${nf.format(pesanan.totalHarga ?: 0)}"
 
-            // Ambil nama gedung untuk koordinat map
+            val totalHarga = pesanan.totalHarga ?: 0
+            val ongkir = if (pesanan.tipeLayanan == "delivery") 3000 else 0
+            val layanan = 2000
+            val subtotal = totalHarga - ongkir - layanan
+
+            tvSubtotal.text = nf.format(subtotal)
+            tvOngkir.text = nf.format(ongkir)
+            tvBiayaLayanan.text = nf.format(layanan)
+            tvTotalHarga.text = nf.format(totalHarga)
+
             val namaGedung = alamatFix.split(",").firstOrNull()?.trim() ?: "Gedung 5"
-
             setupWebView(namaGedung)
 
-            // Item Pesanan
             pesanan.details?.let { items ->
                 if (items.isNotEmpty()) {
                     rvItemPesanan.layoutManager = LinearLayoutManager(requireContext())
                     rvItemPesanan.adapter = ItemDetailAdapter(items)
                 } else {
-                    // Tampilkan pesan jika detail item kosong[cite: 1]
                     Toast.makeText(requireContext(), "Item pesanan kosong", Toast.LENGTH_SHORT).show()
                 }
             }
