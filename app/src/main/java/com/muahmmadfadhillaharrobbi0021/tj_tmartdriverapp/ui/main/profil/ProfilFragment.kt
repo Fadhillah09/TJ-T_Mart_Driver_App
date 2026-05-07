@@ -110,7 +110,11 @@ class ProfilFragment : Fragment() {
                     // 🔥 DEBUG (lihat di Logcat)
                     Log.d("PROFILE_DATA", data.toString())
 
-                    val fotoUrl  = if (data.isNull("foto_url")) null else data.getString("foto_url")
+                    // ✅ PERBAIKAN 1: replace IP agar bisa diakses emulator
+                    val fotoUrl  = if (data.isNull("foto_url")) null
+                    else data.getString("foto_url")
+                        .replace("127.0.0.1", "10.0.2.2")
+                        .replace("localhost", "10.0.2.2")
                     val namaBank = if (data.isNull("nama_bank")) "-" else data.getString("nama_bank")
 
                     // 🔥 FLEXIBLE ambil nomor rekening
@@ -213,7 +217,10 @@ class ProfilFragment : Fragment() {
         withContext(Dispatchers.Main) {
             if (response.isSuccessful) {
                 val json    = JSONObject(body)
+                // ✅ PERBAIKAN 2: replace IP agar bisa diakses emulator
                 val fotoUrl = json.getString("foto_url")
+                    .replace("127.0.0.1", "10.0.2.2")
+                    .replace("localhost", "10.0.2.2")
                 sessionManager.saveFotoProfil(fotoUrl) // ← TAMBAHAN 2
                 Glide.with(requireContext())
                     .load(fotoUrl)
