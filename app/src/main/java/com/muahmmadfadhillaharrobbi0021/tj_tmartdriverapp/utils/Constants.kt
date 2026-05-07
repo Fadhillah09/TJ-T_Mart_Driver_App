@@ -4,7 +4,8 @@ object Constants {
     // BASE_URL — sesuaikan dengan environment:
     // Emulator Android Studio  → "http://10.0.2.2:8000/api/"
     // HP Fisik (WiFi sama PC)  → "http://192.168.X.X:8000/api/"
-    const val BASE_URL = "http://10.0.2.2:8000/api/"
+    const val BASE_URL     = "http://10.0.2.2:8000/"      // untuk foto
+    const val API_BASE_URL = "http://10.0.2.2:8000/api/"
 
     // SharedPreferences
     const val PREF_NAME = "TJMartDriverPref"
