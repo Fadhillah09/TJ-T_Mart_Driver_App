@@ -39,6 +39,15 @@ class BerandaFragment : Fragment() {
     private var currentPesananList: List<Pesanan> = emptyList()
     private var currentIsActive: Boolean = false
 
+    // variabel untuk riwayat
+    private var fullRiwayatList: List<Pesanan> = emptyList()
+    private var isShowingAllRiwayat = false
+    private val RIWAYAT_LIMIT = 5
+
+    // ← TAMBAH INI: variabel untuk sensor/unsensor saldo
+    private var isSaldoVisible = true
+    private var currentSaldoFormatted = ""
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentBerandaBinding.inflate(inflater, container, false)
         return binding.root
@@ -92,8 +101,32 @@ class BerandaFragment : Fragment() {
             }
         }
 
+        // listener tombol lihat semua riwayat
+        binding.btnLihatSemuaRiwayat.setOnClickListener {
+            isShowingAllRiwayat = !isShowingAllRiwayat
+            tampilkanRiwayat()
+        }
+
+        // ← TAMBAH INI: listener icon mata sensor/unsensor saldo
+        binding.ivToggleSaldo.setOnClickListener {
+            isSaldoVisible = !isSaldoVisible
+            updateSaldoVisibility()
+        }
+
         updateToggleUI()
         loadAllData()
+    }
+
+    // ← TAMBAH FUNGSI INI: update tampilan saldo & icon mata
+    private fun updateSaldoVisibility() {
+        if (_binding == null) return
+        if (isSaldoVisible) {
+            binding.tvSaldo.text = currentSaldoFormatted
+            binding.ivToggleSaldo.setImageResource(R.drawable.ic_eye_open)
+        } else {
+            binding.tvSaldo.text = "••••••"
+            binding.ivToggleSaldo.setImageResource(R.drawable.ic_eye_closed)
+        }
     }
 
     override fun onResume() {
@@ -336,7 +369,9 @@ class BerandaFragment : Fragment() {
                         val data = response.body()!!.data!!
                         val nf = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
                         nf.maximumFractionDigits = 0
-                        binding.tvSaldo.text = nf.format(data.saldo)
+                        // ← UBAH INI: simpan ke currentSaldoFormatted, lalu panggil updateSaldoVisibility()
+                        currentSaldoFormatted = nf.format(data.saldo)
+                        updateSaldoVisibility()
                         binding.tvNomorRek.text = data.nomorRekening ?: "-"
                         binding.tvTanggalGaji.text = data.tanggalGaji ?: "-"
                     }
@@ -351,14 +386,29 @@ class BerandaFragment : Fragment() {
                 override fun onResponse(call: Call<PesananResponse>, response: Response<PesananResponse>) {
                     if (_binding == null) return
                     if (response.isSuccessful && response.body() != null) {
-                        val listRaw = response.body()?.data ?: emptyList()
-                        binding.rvRiwayat.adapter = RiwayatAdapter(listRaw)
+                        fullRiwayatList = response.body()?.data ?: emptyList()
+                        isShowingAllRiwayat = false
+                        tampilkanRiwayat()
                     }
                 }
                 override fun onFailure(call: Call<PesananResponse>, t: Throwable) {
                     Log.e("API_ERROR", "Gagal load riwayat: ${t.message}")
                 }
             })
+    }
+
+    private fun tampilkanRiwayat() {
+        if (_binding == null) return
+        val tampil = if (isShowingAllRiwayat) fullRiwayatList else fullRiwayatList.take(RIWAYAT_LIMIT)
+        binding.rvRiwayat.adapter = RiwayatAdapter(tampil)
+
+        if (fullRiwayatList.size > RIWAYAT_LIMIT) {
+            binding.btnLihatSemuaRiwayat.visibility = View.VISIBLE
+            binding.btnLihatSemuaRiwayat.text = if (isShowingAllRiwayat)
+                "Sembunyikan" else "Lihat Semua (${fullRiwayatList.size})"
+        } else {
+            binding.btnLihatSemuaRiwayat.visibility = View.GONE
+        }
     }
 
     override fun onDestroyView() {
