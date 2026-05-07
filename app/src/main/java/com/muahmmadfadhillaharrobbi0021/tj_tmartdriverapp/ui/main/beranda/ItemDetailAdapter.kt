@@ -18,8 +18,12 @@ class ItemDetailAdapter(private val items: List<Pesanan.ItemPesanan>) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
+        val nf = java.text.NumberFormat.getCurrencyInstance(java.util.Locale("id", "ID"))
+        nf.maximumFractionDigits = 0
+
         holder.binding.tvNamaBarang.text = item.namaProduk
         holder.binding.tvQty.text = "${item.qty}x"
+        holder.binding.tvTotal.text = nf.format(item.subtotal ?: 0)
     }
 
     override fun getItemCount() = items.size

@@ -108,27 +108,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkLocationAndTimeAfterScan() {
+
         // 1. VALIDASI WAKTU (06:30 - 08:00 WIB Jakarta)
         val now = Calendar.getInstance()
         val hour = now.get(Calendar.HOUR_OF_DAY)
         val minute = now.get(Calendar.MINUTE)
 
         val totalMinutes = (hour * 60) + minute
-        val startMinute = (6 * 60) + 30 // Jam 06:30
-        val endMinute = 8 * 60         // Jam 08:00
+        val startPagi = (6 * 60) + 30 // 06:30
+        val endPagi = 8 * 60         // 08:00
+        val startSore = 15 * 60      // 15:00
 
-        val isPagi = totalMinutes in startMinute..endMinute
+        val isPagi = totalMinutes in startPagi..endPagi
+        val isSore = totalMinutes >= startSore
         // Jika ingin menambah absen sore, gunakan: val isSore = (hour >= 15)
 
-        if (!isPagi) {
-            val message = if (totalMinutes < startMinute)
-                "Absensi belum dibuka. Mulai jam 06:30 WIB."
-            else
-                "Absensi ditolak! Batas waktu maksimal adalah 08:00 WIB."
-
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-            return // Stop proses jika waktu tidak sesuai
-        }
 
         // 2. CEK IZIN LOKASI
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -145,12 +139,11 @@ class MainActivity : AppCompatActivity() {
                     val distance = results[0]
 
                     if (distance <= MAX_RADIUS) {
-                        // Lolos validasi waktu & lokasi
+                        tentukanKirimAbsen(location.latitude, location.longitude)
                         Toast.makeText(this, "Absensi Berhasil dikirim!", Toast.LENGTH_SHORT).show()
                         // Panggil fungsi kirim data ke API Laravel tubes_pbw2 di sini
                     } else {
-                        // Notifikasi jarak baru muncul SEKARANG setelah scan
-                        Toast.makeText(this, "Gagal! Anda di luar jangkauan Telkom! Jarak: ${distance.toInt()}m", Toast.LENGTH_LONG).show()
+                        showAbsensiDialog("Gagal", "Anda di luar jangkauan Telkom! Jarak: ${distance.toInt()}m", false)
                     }
                 } else {
                     Toast.makeText(this, "Gagal verifikasi lokasi. Pastikan GPS aktif.", Toast.LENGTH_SHORT).show()
@@ -196,6 +189,28 @@ class MainActivity : AppCompatActivity() {
         animateRing(binding.ringOuter, 0L)
         animateRing(binding.ringInner, 900L)
     }
+    // Tambahkan fungsi baru di dalam class MainActivity
+    private fun kirimDataAbsensi(lat: Double, lng: Double, tipe: String) {
+        val koordinat = "$lat,$lng"
+        val token = sessionManager.getBearerToken()
+
+        ApiClient.instance.prosesAbsen(token, koordinat).enqueue(object : Callback<MessageResponse> {
+            override fun onResponse(call: Call<MessageResponse>, response: Response<MessageResponse>) {
+                val body = response.body()
+                if (response.isSuccessful && body != null) {
+                    val judul = if (body.status == "success") "Berhasil" else "Perhatian"
+                    showAbsensiDialog(judul, body.message ?: "Proses absensi selesai", body.status == "success")
+                } else {
+                    val errorJson = response.errorBody()?.string()
+                    showAbsensiDialog("Gagal", "Info: $errorJson", false)
+                }
+            }
+
+            override fun onFailure(call: Call<MessageResponse>, t: Throwable) {
+                showAbsensiDialog("Error", "Koneksi Bermasalah", false)
+            }
+        })
+    }
 
     private fun loadFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction().replace(R.id.fragmentContainer, fragment).commit()
@@ -219,5 +234,45 @@ class MainActivity : AppCompatActivity() {
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish()
+    }
+    private fun kirimDataCheckout(lat: Double, lng: Double) {
+        val koordinat = "$lat,$lng"
+        val token = sessionManager.getBearerToken() ?: ""
+
+        ApiClient.instance.submitCheckout(token, koordinat).enqueue(object : Callback<MessageResponse> {
+            override fun onResponse(call: Call<MessageResponse>, response: Response<MessageResponse>) {
+                val body = response.body()
+                if (response.isSuccessful && body != null) {
+                    showAbsensiDialog("Berhasil", body.message ?: "Checkout berhasil diproses", true)
+                } else {
+                    val errorMsg = response.errorBody()?.string() ?: "Unknown Error"
+                    showAbsensiDialog("Gagal", "Info: $errorMsg", false)
+                }
+            }
+
+            override fun onFailure(call: Call<MessageResponse>, t: Throwable) {
+                showAbsensiDialog("Error", "Koneksi Gagal", false)
+            }
+        })
+    }
+    private fun showAbsensiDialog(title: String, message: String, isSuccess: Boolean) {
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(title)
+            .setMessage(message ?: "Tidak ada pesan dari server")
+            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+            .show()
+    }
+
+    private fun tentukanKirimAbsen(lat: Double, lng: Double) {
+        val now = Calendar.getInstance()
+        val hour = now.get(Calendar.HOUR_OF_DAY)
+
+        if (hour < 11) {
+            // Pagi hari: Panggil API submitAbsensi (Masuk)
+            kirimDataAbsensi(lat, lng, "masuk")
+        } else if (hour >= 15) {
+            // Sore hari: Panggil API submitCheckout (Pulang)
+            kirimDataCheckout(lat, lng)
+        }
     }
 }

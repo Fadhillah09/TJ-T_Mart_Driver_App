@@ -15,12 +15,13 @@ data class Pesanan(
     val user: UserPemesan?,
     @SerializedName("details") val details: List<ItemPesanan>?,
     @SerializedName("alamat_display") val alamatDisplay: String?,
-@SerializedName("pembayaran_display") val pembayaranDisplay: String?
+    @SerializedName("pembayaran_display") val pembayaranDisplay: String?
 ) {
     data class ItemPesanan(
         @SerializedName("nama_produk") val namaProduk: String?,
         val qty: Int?,
-        val harga: Int?
+        @SerializedName("harga_satuan") val harga: Int?,
+        val subtotal: Int?
     )
     data class UserPemesan(
         val name: String?,

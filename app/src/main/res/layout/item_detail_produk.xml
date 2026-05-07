@@ -22,4 +22,13 @@
         android:text="Nama Produk"
         android:textColor="@color/black" />
 
+    <TextView
+        android:id="@+id/tvTotal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Rp 0"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:layout_marginStart="8dp" />
+
 </LinearLayout>
