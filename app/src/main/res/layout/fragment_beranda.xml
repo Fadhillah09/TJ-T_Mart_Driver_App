@@ -208,7 +208,6 @@
                             android:letterSpacing="0.08"
                             android:layout_marginStart="6dp" />
 
-                        <!-- ← UBAH INI: src ganti ke ic_eye_open -->
                         <ImageView
                             android:id="@+id/ivToggleSaldo"
                             android:layout_width="20dp"
@@ -238,6 +237,35 @@
                         android:textSize="11sp"
                         android:layout_marginTop="2dp"
                         android:layout_marginBottom="2dp" />
+
+                    <!-- ← TAMBAH INI: jumlah pesanan hari ini -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="6dp"
+                        android:layout_marginBottom="2dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Pesanan hari ini:"
+                            android:textColor="#AAAAAA"
+                            android:textSize="11sp" />
+
+                        <TextView
+                            android:id="@+id/tvPesananHariIni"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0 pesanan"
+                            android:textColor="#4CAF50"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:layout_marginStart="4dp" />
+
+                    </LinearLayout>
+                    <!-- ─────────────────────────────────────────── -->
 
                     <View
                         android:layout_width="match_parent"

@@ -44,7 +44,7 @@ class BerandaFragment : Fragment() {
     private var isShowingAllRiwayat = false
     private val RIWAYAT_LIMIT = 5
 
-    // ← TAMBAH INI: variabel untuk sensor/unsensor saldo
+    // variabel untuk sensor/unsensor saldo
     private var isSaldoVisible = true
     private var currentSaldoFormatted = ""
 
@@ -107,17 +107,19 @@ class BerandaFragment : Fragment() {
             tampilkanRiwayat()
         }
 
-        // ← TAMBAH INI: listener icon mata sensor/unsensor saldo
+        // listener icon mata sensor/unsensor saldo
         binding.ivToggleSaldo.setOnClickListener {
             isSaldoVisible = !isSaldoVisible
             updateSaldoVisibility()
         }
 
         updateToggleUI()
+        // ← TAMBAH INI: tampilkan counter pesanan harian dari SharedPreferences saat fragment dibuka
+        updatePesananHariIni()
         loadAllData()
     }
 
-    // ← TAMBAH FUNGSI INI: update tampilan saldo & icon mata
+    // update tampilan saldo & icon mata
     private fun updateSaldoVisibility() {
         if (_binding == null) return
         if (isSaldoVisible) {
@@ -129,9 +131,18 @@ class BerandaFragment : Fragment() {
         }
     }
 
+    // ← TAMBAH FUNGSI INI: update tampilan counter pesanan harian
+    private fun updatePesananHariIni() {
+        if (_binding == null) return
+        val count = session.getPesananHariIni()
+        binding.tvPesananHariIni.text = "$count pesanan"
+    }
+
     override fun onResume() {
         super.onResume()
         loadFotoProfil()
+        // ← TAMBAH INI: refresh counter saat kembali ke fragment (antisipasi ganti hari)
+        updatePesananHariIni()
     }
 
     private fun loadFotoProfil() {
@@ -330,6 +341,9 @@ class BerandaFragment : Fragment() {
                     if (_binding == null) return
                     if (response.isSuccessful) {
                         Toast.makeText(requireContext(), "Pesanan selesai!", Toast.LENGTH_SHORT).show()
+                        // ← TAMBAH INI: increment counter pesanan harian saat pesanan selesai
+                        session.tambahPesananHariIni()
+                        updatePesananHariIni()
                         loadAllData()
                     } else {
                         Toast.makeText(requireContext(), "Gagal selesaikan: ${response.code()}", Toast.LENGTH_LONG).show()
@@ -369,7 +383,6 @@ class BerandaFragment : Fragment() {
                         val data = response.body()!!.data!!
                         val nf = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
                         nf.maximumFractionDigits = 0
-                        // ← UBAH INI: simpan ke currentSaldoFormatted, lalu panggil updateSaldoVisibility()
                         currentSaldoFormatted = nf.format(data.saldo)
                         updateSaldoVisibility()
                         binding.tvNomorRek.text = data.nomorRekening ?: "-"

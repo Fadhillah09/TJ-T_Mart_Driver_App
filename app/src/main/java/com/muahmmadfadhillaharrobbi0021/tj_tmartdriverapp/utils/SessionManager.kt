@@ -56,6 +56,54 @@ class SessionManager(context: Context) {
         return pref.getStringSet("rejected_orders", emptySet()) ?: emptySet()
     }
 
+    // ─── PESANAN HARIAN ────────────────────────────────────────────────────────
+
+    private val KEY_PESANAN_HARIAN_COUNT = "pesanan_harian_count"
+    private val KEY_PESANAN_HARIAN_TANGGAL = "pesanan_harian_tanggal"
+
+    /** Ambil tanggal hari ini dalam format "yyyy-MM-dd" */
+    private fun getTodayString(): String {
+        val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+        return sdf.format(java.util.Date())
+    }
+
+    /**
+     * Ambil jumlah pesanan hari ini.
+     * Otomatis reset ke 0 kalau tanggal sudah berganti.
+     */
+    fun getPesananHariIni(): Int {
+        val savedDate = pref.getString(KEY_PESANAN_HARIAN_TANGGAL, "") ?: ""
+        val today = getTodayString()
+        return if (savedDate == today) {
+            pref.getInt(KEY_PESANAN_HARIAN_COUNT, 0)
+        } else {
+            // Hari sudah berganti → reset otomatis
+            editor.putString(KEY_PESANAN_HARIAN_TANGGAL, today)
+            editor.putInt(KEY_PESANAN_HARIAN_COUNT, 0)
+            editor.apply()
+            0
+        }
+    }
+
+    /**
+     * Tambah 1 ke counter pesanan hari ini.
+     * Otomatis reset ke 1 kalau tanggal sudah berganti.
+     */
+    fun tambahPesananHariIni() {
+        val today = getTodayString()
+        val savedDate = pref.getString(KEY_PESANAN_HARIAN_TANGGAL, "") ?: ""
+        val currentCount = if (savedDate == today) {
+            pref.getInt(KEY_PESANAN_HARIAN_COUNT, 0)
+        } else {
+            0
+        }
+        editor.putString(KEY_PESANAN_HARIAN_TANGGAL, today)
+        editor.putInt(KEY_PESANAN_HARIAN_COUNT, currentCount + 1)
+        editor.apply()
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+
     fun logout() {
         editor.clear()
         editor.apply()
