@@ -1,11 +1,14 @@
 package com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.utils
 
 object Constants {
-    // BASE_URL — sesuaikan dengan environment:
-    // Emulator Android Studio  → "http://10.0.2.2:8000/api/"
-    // HP Fisik (WiFi sama PC)  → "http://192.168.X.X:8000/api/"
-    const val BASE_URL    = "http://10.0.2.2:8000/"     // untuk foto
-    const val API_BASE_URL = "http://10.0.2.2:8000/api/"
+    // Alamat utama dari Cloudflare Worker
+    private const val CLOUDFLARE_URL = "https://proud-base-e00d.fadhillaharrobbi.workers.dev/"
+
+    // Gunakan ini untuk mengambil foto (tanpa folder api)
+    const val BASE_URL = CLOUDFLARE_URL
+
+    // Gunakan ini untuk request data (dengan folder api)
+    const val API_BASE_URL = "${CLOUDFLARE_URL}api/"
 
     // SharedPreferences
     const val PREF_NAME = "TJMartDriverPref"
