@@ -6,31 +6,166 @@
     android:orientation="vertical"
     android:background="#F5F5F5">
 
-    <!-- Header -->
-    <RelativeLayout
+    <!-- HEADER -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="@color/white"
-        android:paddingHorizontal="16dp"
+        android:background="@color/telkom_red"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
         android:elevation="4dp">
 
         <ImageView
             android:id="@+id/ivBack"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:layout_centerVertical="true"
-            android:src="@drawable/ic_back" />
+            android:src="@drawable/ic_back"
+            android:tint="@color/white"
+            android:padding="2dp" />
 
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="Detail Pesanan"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/black" />
-    </RelativeLayout>
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Detail Pesanan"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="32dp"
+            android:layout_height="32dp" />
+
+    </LinearLayout>
+
+    <!-- TIMELINE STATUS — 4 Step -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@color/white"
+        android:paddingVertical="10dp"
+        android:paddingHorizontal="8dp"
+        android:gravity="center_vertical"
+        android:elevation="2dp">
+
+        <!-- Step 1: Diproses - redup -->
+        <LinearLayout
+            android:id="@+id/layoutStep1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:alpha="0.4">
+            <ImageView
+                android:id="@+id/ivStep1"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/ic_receipt"
+                android:tint="@color/telkom_red" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Diproses"
+                android:textSize="9sp"
+                android:textColor="@color/telkom_red"
+                android:layout_marginTop="3dp" />
+        </LinearLayout>
+
+        <View android:layout_width="14dp" android:layout_height="2dp"
+            android:background="@color/telkom_red" />
+
+        <!-- Step 2: Disiapkan - AKTIF -->
+        <LinearLayout
+            android:id="@+id/layoutStep2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:alpha="1.0">
+            <ImageView
+                android:id="@+id/ivStep2"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/ic_shopping_bag"
+                android:tint="@color/telkom_red" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Disiapkan"
+                android:textSize="9sp"
+                android:textColor="@color/telkom_red"
+                android:textStyle="bold"
+                android:layout_marginTop="3dp" />
+        </LinearLayout>
+
+        <View android:layout_width="14dp" android:layout_height="2dp"
+            android:background="@color/telkom_red" android:alpha="0.3" />
+
+        <!-- Step 3: Diantar - redup -->
+        <LinearLayout
+            android:id="@+id/layoutStep3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:alpha="0.4">
+            <ImageView
+                android:id="@+id/ivStep3"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/ic_delivery"
+                android:tint="@color/telkom_red" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Diantar"
+                android:textSize="9sp"
+                android:textColor="@color/telkom_red"
+                android:layout_marginTop="3dp" />
+        </LinearLayout>
+
+        <View android:layout_width="14dp" android:layout_height="2dp"
+            android:background="@color/telkom_red" android:alpha="0.3" />
+
+        <!-- Step 4: Tiba - redup -->
+        <LinearLayout
+            android:id="@+id/layoutStep4"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:alpha="0.4">
+            <ImageView
+                android:id="@+id/ivStep4"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/ic_check_circle"
+                android:tint="#4CAF50" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tiba"
+                android:textSize="9sp"
+                android:textColor="#4CAF50"
+                android:layout_marginTop="3dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- SCROLLABLE CONTENT -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -42,7 +177,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Card Gabungan: Pelanggan + Pesanan + Lokasi Pengantaran -->
+            <!-- Card Pelanggan + Pesanan + Lokasi -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -55,7 +190,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- Section: Pelanggan (dipindah ke atas) -->
+                    <!-- Section: Pelanggan -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -108,9 +243,7 @@
                                     android:text="Metode: Cash"
                                     android:textColor="#9E9E9E"
                                     android:textSize="13sp" />
-
                             </LinearLayout>
-
                         </LinearLayout>
 
                         <View
@@ -126,16 +259,11 @@
                             android:text="Gedung F, Kamar 301"
                             android:textColor="#757575"
                             android:textSize="13sp" />
-
                     </LinearLayout>
 
-                    <!-- Divider antar section -->
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#EEEEEE" />
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#EEEEEE" />
 
-                    <!-- Section: Pesanan (dipindah ke bawah Pelanggan) -->
+                    <!-- Section: Pesanan -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -163,116 +291,45 @@
                             android:layout_marginVertical="12dp"
                             android:background="#EEEEEE" />
 
-                        <!-- Subtotal -->
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:layout_marginBottom="4dp">
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Subtotal"
-                                android:textSize="14sp"
-                                android:textColor="@color/black" />
-
-                            <TextView
-                                android:id="@+id/tvSubtotal"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Rp0"
-                                android:textSize="14sp"
-                                android:textColor="@color/black" />
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:orientation="horizontal" android:layout_marginBottom="4dp">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1" android:text="Subtotal" android:textSize="14sp" android:textColor="@color/black" />
+                            <TextView android:id="@+id/tvSubtotal" android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" android:text="Rp0" android:textSize="14sp" android:textColor="@color/black" />
                         </LinearLayout>
 
-                        <!-- Ongkos Kirim -->
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:layout_marginBottom="4dp">
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Ongkos Kirim"
-                                android:textSize="14sp"
-                                android:textColor="@color/black" />
-
-                            <TextView
-                                android:id="@+id/tvOngkir"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Rp3.000"
-                                android:textSize="14sp"
-                                android:textColor="@color/black" />
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:orientation="horizontal" android:layout_marginBottom="4dp">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1" android:text="Ongkos Kirim" android:textSize="14sp" android:textColor="@color/black" />
+                            <TextView android:id="@+id/tvOngkir" android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" android:text="Rp3.000" android:textSize="14sp" android:textColor="@color/black" />
                         </LinearLayout>
 
-                        <!-- Biaya Layanan -->
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:layout_marginBottom="8dp">
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Biaya Layanan"
-                                android:textSize="14sp"
-                                android:textColor="@color/black" />
-
-                            <TextView
-                                android:id="@+id/tvBiayaLayanan"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Rp2.000"
-                                android:textSize="14sp"
-                                android:textColor="@color/black" />
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:orientation="horizontal" android:layout_marginBottom="8dp">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1" android:text="Biaya Layanan" android:textSize="14sp" android:textColor="@color/black" />
+                            <TextView android:id="@+id/tvBiayaLayanan" android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" android:text="Rp2.000" android:textSize="14sp" android:textColor="@color/black" />
                         </LinearLayout>
 
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_marginBottom="8dp"
-                            android:background="#EEEEEE" />
+                        <View android:layout_width="match_parent" android:layout_height="1dp"
+                            android:layout_marginBottom="8dp" android:background="#EEEEEE" />
 
-                        <!-- Total Akhir -->
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                             android:orientation="horizontal">
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Total"
-                                android:textStyle="bold"
-                                android:textSize="15sp"
-                                android:textColor="@color/black" />
-
-                            <TextView
-                                android:id="@+id/tvTotalHarga"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Rp0"
-                                android:textSize="15sp"
-                                android:textStyle="bold"
-                                android:textColor="@color/red" />
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1" android:text="Total" android:textStyle="bold"
+                                android:textSize="15sp" android:textColor="@color/black" />
+                            <TextView android:id="@+id/tvTotalHarga" android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" android:text="Rp0" android:textSize="15sp"
+                                android:textStyle="bold" android:textColor="@color/red" />
                         </LinearLayout>
-
                     </LinearLayout>
 
-                    <!-- Divider antar section -->
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#EEEEEE" />
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#EEEEEE" />
 
                     <!-- Section: Lokasi Pengantaran -->
                     <LinearLayout
@@ -293,13 +350,11 @@
                         <FrameLayout
                             android:layout_width="match_parent"
                             android:layout_height="180dp">
-
                             <WebView
                                 android:id="@+id/webViewMap"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent" />
                         </FrameLayout>
-
                     </LinearLayout>
 
                 </LinearLayout>
@@ -309,16 +364,18 @@
     </androidx.core.widget.NestedScrollView>
 
     <!-- Tombol Antar Pesanan -->
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnDiantar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="52dp"
         android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="24dp"
-        android:text="Antar Pesanan"
-        android:textAllCaps="true"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="20dp"
+        android:text="ANTAR PESANAN"
+        android:textSize="15sp"
         android:textStyle="bold"
-        android:backgroundTint="@color/telkom_red" />
+        android:textColor="@color/white"
+        app:backgroundTint="@color/telkom_red"
+        style="@style/Widget.MaterialComponents.Button" />
 
 </LinearLayout>

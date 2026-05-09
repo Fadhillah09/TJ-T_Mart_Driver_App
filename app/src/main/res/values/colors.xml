@@ -7,7 +7,8 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="primary_red">#E31A1A</color>
-    <color name="telkom_red">#B00000</color> <color name="telkom_red_light">#FFEBEE</color>
+    <color name="telkom_red">#B00000</color>
+    <color name="telkom_red_light">#FFEBEE</color>
     <color name="text_main">#212121</color>
     <color name="text_sub">#757575</color>
     <color name="telkom_red_soft">#FFEBEE</color> <color name="white">#FFFFFF</color>

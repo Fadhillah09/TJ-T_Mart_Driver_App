@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F5">
+
+    <!-- ═══════════════════════════════════════════
+         TOP APP BAR — Konsisten Tema Telkom Merah
+    ═══════════════════════════════════════════ -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@color/telkom_red"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:elevation="4dp">
+
+        <!-- Tombol back -->
+        <ImageView
+            android:id="@+id/ivBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:src="@drawable/ic_back"
+            android:tint="@color/white"
+            android:padding="8dp" />
+
+        <!-- Avatar + Nama pembeli (center) -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:id="@+id/ivAvatarChat"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:src="@drawable/ic_person"
+                android:background="@drawable/bg_rounded_gray"
+                android:scaleType="centerCrop"
+                android:layout_marginEnd="8dp" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/tvNamaChatHeader"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nama Pembeli"
+                    android:textColor="@color/white"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/tvStatusChat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sedang Diantar"
+                    android:textColor="#FFCDD2"
+                    android:textSize="11sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Tombol Telepon VoIP — kanan -->
+        <ImageView
+            android:id="@+id/btnVoipCall"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/ic_phone"
+            android:tint="@color/white"
+            android:padding="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless" />
+    </RelativeLayout>
+
+    <!-- ═══════════════════════════════════════════
+         DAFTAR PESAN (RecyclerView)
+    ═══════════════════════════════════════════ -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvChat"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="12dp"
+        android:clipToPadding="false"
+        android:scrollbars="none" />
+
+    <!-- ═══════════════════════════════════════════
+         PANEL INPUT CHAT
+    ═══════════════════════════════════════════ -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/white"
+        android:elevation="8dp">
+
+        <!-- Divider tipis -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#EEEEEE" />
+
+        <!-- Preview media yang dipilih (tersembunyi jika tidak ada) -->
+        <LinearLayout
+            android:id="@+id/layoutMediaPreview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp"
+            android:background="#FFF5F5"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/ivMediaPreview"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:scaleType="centerCrop"
+                android:background="#FFE0E0" />
+
+            <TextView
+                android:id="@+id/tvMediaLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:text="1 file dipilih"
+                android:textSize="13sp"
+                android:textColor="#424242" />
+
+            <ImageView
+                android:id="@+id/btnBatalMedia"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_arrow_back"
+                android:tint="#B00000"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="2dp" />
+        </LinearLayout>
+
+        <!-- Baris input teks + tombol -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="8dp">
+
+            <!-- Tombol Kirim Foto -->
+            <ImageView
+                android:id="@+id/btnKirimFoto"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/ic_photo_camera"
+                android:tint="@color/telkom_red"
+                android:padding="4dp"
+                android:layout_marginEnd="4dp"
+                android:background="?attr/selectableItemBackgroundBorderless" />
+
+            <!-- Tombol Kirim Video -->
+            <ImageView
+                android:id="@+id/btnKirimVideo"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/ic_videocam"
+                android:tint="@color/telkom_red"
+                android:padding="4dp"
+                android:layout_marginEnd="6dp"
+                android:background="?attr/selectableItemBackgroundBorderless" />
+
+            <!-- EditText pesan -->
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPesan"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Tulis pesan..."
+                android:textSize="14sp"
+                android:textColor="#212121"
+                android:background="@drawable/bg_input_chat"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="10dp"
+                android:maxLines="4"
+                android:inputType="textMultiLine|textCapSentences"
+                android:imeOptions="actionNone" />
+
+            <!-- Tombol Kirim -->
+            <ImageView
+                android:id="@+id/btnKirimPesan"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:src="@drawable/ic_send"
+                android:tint="@color/white"
+                android:background="@drawable/bg_circle_red"
+                android:padding="10dp"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

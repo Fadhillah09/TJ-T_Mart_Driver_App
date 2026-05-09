@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/telkom_red">
+
+    <!-- Lingkaran pulse background (animasi dari code) -->
+    <View
+        android:id="@+id/pulseCircle1"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_circle_white_alpha"
+        android:alpha="0" />
+
+    <View
+        android:id="@+id/pulseCircle2"
+        android:layout_width="220dp"
+        android:layout_height="220dp"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_circle_white_alpha"
+        android:alpha="0" />
+
+    <!-- Konten utama -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="32dp">
+
+        <!-- Icon centang besar -->
+        <FrameLayout
+            android:layout_width="140dp"
+            android:layout_height="140dp"
+            android:layout_gravity="center_horizontal">
+
+            <!-- Lingkaran putih -->
+            <View
+                android:id="@+id/circleBackground"
+                android:layout_width="140dp"
+                android:layout_height="140dp"
+                android:background="@drawable/bg_circle_white"
+                android:scaleX="0"
+                android:scaleY="0" />
+
+            <!-- Ikon centang -->
+            <ImageView
+                android:id="@+id/ivCheckIcon"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_check_circle"
+                android:tint="@color/telkom_red"
+                android:scaleX="0"
+                android:scaleY="0" />
+        </FrameLayout>
+
+        <!-- Teks Selesai -->
+        <TextView
+            android:id="@+id/tvSelesai"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="Pesanan Tiba!"
+            android:textColor="@color/white"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:alpha="0"
+            android:translationY="30dp" />
+
+        <TextView
+            android:id="@+id/tvSubSelesai"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Pembeli sudah mendapatkan pesanannya 🛵"
+            android:textColor="#FFCDD2"
+            android:textSize="15sp"
+            android:gravity="center"
+            android:alpha="0"
+            android:translationY="30dp" />
+
+        <!-- Nama pembeli -->
+        <TextView
+            android:id="@+id/tvNamaPembeliSelesai"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:alpha="0"
+            android:translationY="30dp" />
+
+        <!-- Divider -->
+        <View
+            android:layout_width="60dp"
+            android:layout_height="2dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp"
+            android:background="#FFCDD2"
+            android:id="@+id/dividerSelesai"
+            android:alpha="0" />
+
+        <!-- Info total -->
+        <LinearLayout
+            android:id="@+id/layoutInfoTotal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:alpha="0">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Total Pembayaran"
+                android:textColor="#FFCDD2"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/tvTotalSelesai"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Rp 0"
+                android:textColor="@color/white"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
+
+        <!-- Tombol kembali ke beranda -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnKembaliKeBeranda"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="48dp"
+            android:text="Kembali ke Beranda"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="@color/telkom_red"
+            android:alpha="0"
+            app:backgroundTint="@color/white"
+            style="@style/Widget.MaterialComponents.Button"
+            xmlns:app="http://schemas.android.com/apk/res-auto" />
+
+    </LinearLayout>
+
+    <!-- Confetti container (particle views diisi secara programatik) -->
+    <!-- clickable=false agar touch tidak terblokir oleh layer ini -->
+    <FrameLayout
+        android:id="@+id/confettiContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="false"
+        android:focusable="false" />
+
+</FrameLayout>

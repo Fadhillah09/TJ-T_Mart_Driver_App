@@ -45,6 +45,20 @@ class SessionManager(context: Context) {
 
     fun getFotoProfil(): String = pref.getString("foto_profil", "") ?: ""
 
+    // --- TAMBAHKAN FUNGSI BARU DI SINI ---
+
+    fun getPesananHariIni(): Int {
+        return pref.getInt("pesanan_hari_ini", 0)
+    }
+
+    fun tambahPesananHariIni() {
+        val currentCount = getPesananHariIni()
+        editor.putInt("pesanan_hari_ini", currentCount + 1)
+        editor.apply()
+    }
+
+    // -------------------------------------
+
     fun rejectPesananLokal(pesananId: Int) {
         val current = pref.getStringSet("rejected_orders", emptySet()) ?: emptySet()
         val rejectedIds = HashSet<String>(current)

@@ -387,6 +387,10 @@ class BerandaFragment : Fragment() {
                         updateSaldoVisibility()
                         binding.tvNomorRek.text = data.nomorRekening ?: "-"
                         binding.tvTanggalGaji.text = data.tanggalGaji ?: "-"
+
+                        // ← Pakai dari API, bukan SharedPreferences
+                        val jumlah = data.pesananHariIni ?: 0
+                        binding.tvPesananHariIni.text = "$jumlah pesanan"
                     }
                 }
                 override fun onFailure(call: Call<OmsetResponse>, t: Throwable) {}

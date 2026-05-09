@@ -47,21 +47,22 @@ class AnterPesananFragment : Fragment() {
     private var destLng: Double = 0.0
 
     // Timer
-    private var timerHandler = Handler(Looper.getMainLooper())
+    private val timerHandler = Handler(Looper.getMainLooper())
     private var elapsedSeconds = 0L
     private var timerRunnable: Runnable? = null
 
-    // Data pesanan
+    // State
     private var pesanan: Pesanan? = null
     private var isSelesai = false
+
+    // Auto-chat: hanya kirim sekali saat ≤ 5 meter
+    private var autoChatSent = false
+
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            startLocationUpdates()
-        } else {
-            Toast.makeText(requireContext(), "Izin lokasi ditolak", Toast.LENGTH_SHORT).show()
-        }
+    ) { isGranted ->
+        if (isGranted) startLocationUpdates()
+        else Toast.makeText(requireContext(), "Izin lokasi ditolak", Toast.LENGTH_SHORT).show()
     }
 
     companion object {
@@ -84,6 +85,7 @@ class AnterPesananFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         session = SessionManager(requireContext())
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
@@ -92,45 +94,35 @@ class AnterPesananFragment : Fragment() {
         startTimer()
 
         binding.ivBack.setOnClickListener { parentFragmentManager.popBackStack() }
-
-        binding.btnNavigasi.setOnClickListener { openGoogleMapsNavigation() }
-
-        binding.btnHubungiPembeli.setOnClickListener { dialPembeli() }
-
+        binding.btnHubungiPembeli.setOnClickListener { hubungiViaWhatsApp() }
+        binding.btnChat.setOnClickListener { bukaChat() }
         binding.btnPesananTiba.setOnClickListener { konfirmasiTiba() }
     }
 
-
     private fun setupTimeline() {
-        // Set status awal: "Diantar" aktif
         with(binding) {
-            tvStep1.alpha = 0.4f
-            tvStep2.alpha = 0.4f
-            tvStep3.alpha = 1f   // Diantar = aktif
-            tvStep4.alpha = 0.4f
-            ivStep1.alpha = 0.4f
-            ivStep2.alpha = 0.4f
-            ivStep3.alpha = 1f
-            ivStep4.alpha = 0.4f
+            // Step 1 & 2 redup (sudah lewat)
+            layoutStep1.alpha = 0.4f
+            layoutStep2.alpha = 0.4f
+            // Step 3 aktif
+            layoutStep3.alpha = 1f
+            // Step 4 masih redup
+            layoutStep4.alpha = 0.4f
         }
     }
 
     private fun markTiba() {
         with(binding) {
-            tvStep4.alpha = 1f
-            ivStep4.alpha = 1f
+            layoutStep4.alpha = 1f
             ivStep4.setImageResource(R.drawable.ic_check_circle)
         }
     }
-
 
     private fun fetchDetailPesanan() {
         binding.progressBar.visibility = View.VISIBLE
         ApiClient.instance.getPesanan(session.getBearerToken())
             .enqueue(object : Callback<PesananResponse> {
-                override fun onResponse(
-                    call: Call<PesananResponse>, response: Response<PesananResponse>
-                ) {
+                override fun onResponse(call: Call<PesananResponse>, response: Response<PesananResponse>) {
                     if (_binding == null) return
                     binding.progressBar.visibility = View.GONE
                     if (response.isSuccessful) {
@@ -142,8 +134,8 @@ class AnterPesananFragment : Fragment() {
                         }
                     }
                 }
-
                 override fun onFailure(call: Call<PesananResponse>, t: Throwable) {
+                    if (_binding == null) return
                     binding.progressBar.visibility = View.GONE
                     Toast.makeText(requireContext(), "Gagal memuat: ${t.message}", Toast.LENGTH_SHORT).show()
                 }
@@ -151,29 +143,24 @@ class AnterPesananFragment : Fragment() {
     }
 
     private fun setupUI(p: Pesanan) {
-        val localeID = Locale("in", "ID")
-        val nf = NumberFormat.getCurrencyInstance(localeID).apply {
+        val nf = NumberFormat.getCurrencyInstance(Locale("in", "ID")).apply {
             maximumFractionDigits = 0
         }
-
         with(binding) {
-            tvNamaPembeli.text    = p.user?.name ?: "Pelanggan"
-            // Pastikan p.user tidak null saat akses
-            tvTeleponPembeli.text = p.user?.noTelp ?: "-"
-            tvAlamatTujuan.text   = p.alamatDisplay ?: "Alamat tidak tersedia"
+            tvNamaPembeli.text      = p.user?.name ?: "Pelanggan"
+            tvTeleponPembeli.text   = p.user?.noTelp ?: "-"
+            tvAlamatTujuan.text     = p.alamatDisplay ?: "Alamat tidak tersedia"
             tvMetodePembayaran.text = p.pembayaranDisplay ?: "Cash"
             tvTotalHarga.text       = nf.format(p.totalHarga ?: 0)
-            tvIdPesanan.text        = "#${p.id}"
         }
 
-        // Ambil coords tujuan
+        // Koordinat tujuan
         val namaGedung = p.alamatDisplay?.split(",")?.firstOrNull()?.trim()
             ?: p.user?.alamatGedung ?: "Gedung 5"
         val raw = getCoords(namaGedung).split(",")
         destLat = raw[0].toDoubleOrNull() ?: -6.9706729
         destLng = raw[1].toDoubleOrNull() ?: 107.627767
     }
-
 
     private fun startLocationUpdates() {
         if (ActivityCompat.checkSelfPermission(
@@ -185,11 +172,11 @@ class AnterPesananFragment : Fragment() {
         }
 
         val req = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000L)
-            .setMinUpdateDistanceMeters(10f).build()
+            .setMinUpdateDistanceMeters(2f).build()
 
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(result: LocationResult) {
-                val loc: Location = result.lastLocation ?: return
+                val loc = result.lastLocation ?: return
                 driverLat = loc.latitude
                 driverLng = loc.longitude
                 updateMap()
@@ -198,8 +185,6 @@ class AnterPesananFragment : Fragment() {
         }
 
         fusedLocationClient.requestLocationUpdates(req, locationCallback, Looper.getMainLooper())
-
-        // Ambil lokasi terakhir segera
         fusedLocationClient.lastLocation.addOnSuccessListener { loc ->
             if (loc != null) {
                 driverLat = loc.latitude
@@ -227,61 +212,34 @@ class AnterPesananFragment : Fragment() {
     private fun buildMapHtml(dLat: Double, dLng: Double, tLat: Double, tLng: Double): String {
         val apiKey = "AIzaSyBUJmPMTiRWnPLl4b3UtQC2CC8abm41yzA"
         return """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style>
-            /* Penting: Pastikan height 100% agar tidak putih */
-            html, body, #map { height: 100%; margin: 0; padding: 0; }
-            .legend {
-                position:absolute; bottom:20px; left:50%; transform:translateX(-50%);
-                background:white; border-radius:20px; padding:8px 16px;
-                display:flex; gap:12px; font-size:12px; box-shadow:0 2px 8px rgba(0,0,0,0.2);
-                font-family:sans-serif; z-index: 999;
-            }
-            .dot { width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:4px; }
-        </style>
-    </head>
-    <body>
+        <!DOCTYPE html><html>
+        <head><meta name="viewport" content="width=device-width,initial-scale=1">
+        <style>html,body,#map{height:100%;margin:0;padding:0}
+        .legend{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:white;
+        border-radius:20px;padding:8px 16px;display:flex;gap:12px;font-size:12px;
+        box-shadow:0 2px 8px rgba(0,0,0,.2);font-family:sans-serif;z-index:999}
+        .dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:4px}</style>
+        </head><body>
         <div id="map"></div>
         <div class="legend">
-            <span><span class="dot" style="background:#1a73e8"></span> Driver</span>
-            <span><span class="dot" style="background:#ea4335"></span> Tujuan</span>
+          <span><span class="dot" style="background:#1a73e8"></span>Driver</span>
+          <span><span class="dot" style="background:#ea4335"></span>Tujuan</span>
         </div>
         <script>
-            function initMap() {
-                const driver = {lat: $dLat, lng: $dLng};
-                const dest   = {lat: $tLat, lng: $tLng};
-                
-                const map = new google.maps.Map(document.getElementById('map'), {
-                    zoom: 16,
-                    center: driver,
-                    mapTypeControl: false,
-                    streetViewControl: false,
-                    fullscreenControl: false
-                });
-
-                new google.maps.Marker({
-                    position: driver, map, title: 'Driver',
-                    icon: { path: google.maps.SymbolPath.CIRCLE, scale: 8, fillColor: '#1a73e8', fillOpacity: 1, strokeColor: 'white', strokeWeight: 2 }
-                });
-
-                new google.maps.Marker({
-                    position: dest, map, title: 'Tujuan'
-                });
-
-                const bounds = new google.maps.LatLngBounds();
-                bounds.extend(driver);
-                bounds.extend(dest);
-                map.fitBounds(bounds);
-            }
+        function initMap(){
+          const driver={lat:$dLat,lng:$dLng}, dest={lat:$tLat,lng:$tLng};
+          const map=new google.maps.Map(document.getElementById('map'),{
+            zoom:16,center:driver,mapTypeControl:false,streetViewControl:false,fullscreenControl:false});
+          new google.maps.Marker({position:driver,map,title:'Driver',
+            icon:{path:google.maps.SymbolPath.CIRCLE,scale:8,fillColor:'#1a73e8',
+            fillOpacity:1,strokeColor:'white',strokeWeight:2}});
+          new google.maps.Marker({position:dest,map,title:'Tujuan'});
+          const b=new google.maps.LatLngBounds();b.extend(driver);b.extend(dest);map.fitBounds(b);
+        }
         </script>
-        <!-- Tambahkan callback=initMap dan loading=async -->
         <script src="https://maps.googleapis.com/maps/api/js?key=$apiKey&callback=initMap&loading=async" async defer></script>
-    </body>
-    </html>
-    """.trimIndent()
+        </body></html>
+        """.trimIndent()
     }
 
     private fun updateJarak() {
@@ -289,62 +247,174 @@ class AnterPesananFragment : Fragment() {
         val results = FloatArray(1)
         Location.distanceBetween(driverLat, driverLng, destLat, destLng, results)
         val meter = results[0].toInt()
-        val teks = if (meter >= 1000) String.format("%.1f km", meter / 1000f)
-        else "$meter m"
-        binding.tvJarak.text = "Jarak: $teks"
+
+        // Tampilkan label jarak
+        val teks = if (meter >= 1000) String.format("Jarak: %.1f km", meter / 1000f)
+        else "Jarak: $meter m"
+        binding.tvJarak.text = teks
+
+        // ── AUTO-CHAT saat jarak ≤ 5 meter ────────────────────────────
+        if (meter <= 5 && !autoChatSent) {
+            autoChatSent = true
+            kirimAutoChatHampirTiba()
+            // Tampilkan banner di atas peta
+            binding.bannerDekat.visibility = View.VISIBLE
+        }
     }
 
-    // Timer
+    /**
+     * Mengirim pesan otomatis ke chat internal saat driver ≤ 5 meter dari tujuan.
+     * Pesan disimpan ke ChatRepository / database lokal sehingga pelanggan melihatnya di sisi mereka.
+     */
+    private fun kirimAutoChatHampirTiba() {
+        // Simpan pesan otomatis via ChatRepository (Room/Firestore/API sesuai implementasi chat)
+        // Contoh menggunakan API endpoint chat:
+        // ApiClient.instance.kirimPesan(
+        //     token = session.getBearerToken(),
+        //     pesananId = pesananId,
+        //     pesan = "Pesanan Anda sebentar lagi telah sampai! 🛵"
+        // ).enqueue(...)
+
+        // Untuk sementara, buka fragment chat dan sisipkan pesan otomatis
+        val fragment = ChatPesananFragment.newInstance(
+            pesananId  = pesananId,
+            namaPembeli = pesanan?.user?.name ?: "Pelanggan",
+            nomorPembeli = pesanan?.user?.noTelp ?: "",
+            autoPesan  = "Pesanan Anda sebentar lagi telah sampai! 🛵"
+        )
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    // ─── Timer ────────────────────────────────────────────────────────────────
 
     private fun startTimer() {
         timerRunnable = object : Runnable {
             override fun run() {
                 elapsedSeconds++
-                val jam  = elapsedSeconds / 3600
-                val mnt  = (elapsedSeconds % 3600) / 60
-                val dtk  = elapsedSeconds % 60
-                val teks = if (jam > 0) String.format("%02d:%02d:%02d", jam, mnt, dtk)
-                else String.format("%02d:%02d", mnt, dtk)
-                binding.tvTimer.text = teks
+                val jam = elapsedSeconds / 3600
+                val mnt = (elapsedSeconds % 3600) / 60
+                val dtk = elapsedSeconds % 60
+                binding.tvTimer.text = if (jam > 0)
+                    String.format("%02d:%02d:%02d", jam, mnt, dtk)
+                else
+                    String.format("%02d:%02d", mnt, dtk)
                 timerHandler.postDelayed(this, 1000)
             }
         }
         timerHandler.post(timerRunnable!!)
     }
 
-    // Aksi Tombol
 
-    private fun openGoogleMapsNavigation() {
-        if (destLat == 0.0) return
-        val uri = Uri.parse("google.navigation:q=$destLat,$destLng")
-        val intent = Intent(Intent.ACTION_VIEW, uri).apply { setPackage("com.google.android.apps.maps") }
-        if (intent.resolveActivity(requireActivity().packageManager) != null) startActivity(intent)
-        else startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/maps/dir/?api=1&destination=$destLat,$destLng")))
-    }
+    /**
+     * Hubungi pembeli via WhatsApp.
+     * - Jika WA terpasang dan nomor terdaftar → buka chat WA langsung.
+     * - Jika WA tidak terpasang → fallback ke Intent dial biasa.
+     * - Jika nomor kosong / tidak valid → tampilkan toast informatif.
+     */
+    private fun hubungiViaWhatsApp() {
+        val rawPhone = pesanan?.user?.noTelp
 
-    private fun dialPembeli() {
-        val user = pesanan?.user
-        val phoneNum = user?.noTelp
-
-        if (phoneNum.isNullOrBlank()) {
-            Toast.makeText(requireContext(), "Nomor tidak tersedia", Toast.LENGTH_SHORT).show()
+        if (rawPhone.isNullOrBlank()) {
+            Toast.makeText(requireContext(), "Nomor telepon tidak tersedia", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phoneNum"))
-        startActivity(intent)
+        val normalized = normalizePhone(rawPhone)
+
+        // Cek apakah WhatsApp terpasang
+        val pm = requireActivity().packageManager
+        val waPackage = "com.whatsapp"
+        val waBusinessPackage = "com.whatsapp.w4b"
+
+        val isWaInstalled = try {
+            pm.getPackageInfo(waPackage, 0)
+            true
+        } catch (e: PackageManager.NameNotFoundException) {
+            false
+        }
+
+        val isWaBusinessInstalled = try {
+            pm.getPackageInfo(waBusinessPackage, 0)
+            true
+        } catch (e: PackageManager.NameNotFoundException) {
+            false
+        }
+
+        when {
+            isWaInstalled || isWaBusinessInstalled -> {
+                // Buka WhatsApp langsung ke nomor pembeli
+                // Catatan: jika nomor tidak terdaftar di WA, WhatsApp sendiri yang menampilkan
+                // pesan "Nomor ini tidak terdaftar di WhatsApp"
+                try {
+                    val uri = Uri.parse("https://wa.me/$normalized")
+                    val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+                        if (isWaInstalled) setPackage(waPackage)
+                    }
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    // Fallback ke web WhatsApp
+                    val webIntent = Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("https://wa.me/$normalized")
+                    )
+                    startActivity(webIntent)
+                }
+            }
+
+            else -> {
+                // WhatsApp tidak terpasang → fallback ke dial biasa
+                Toast.makeText(
+                    requireContext(),
+                    "WhatsApp tidak ditemukan. Menghubungi via telepon...",
+                    Toast.LENGTH_SHORT
+                ).show()
+                val dialIntent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$rawPhone"))
+                startActivity(dialIntent)
+            }
+        }
     }
+
+
+    private fun normalizePhone(phone: String): String {
+        val cleaned = phone.replace(Regex("[^0-9+]"), "")
+        return when {
+            cleaned.startsWith("+62") -> cleaned.removePrefix("+")
+            cleaned.startsWith("62")  -> cleaned
+            cleaned.startsWith("0")   -> "62" + cleaned.removePrefix("0")
+            else                       -> "62$cleaned"
+        }
+    }
+
+    private fun bukaChat() {
+        val p = pesanan
+        if (p == null) {
+            Toast.makeText(requireContext(), "Data pesanan belum siap", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val fragment = ChatPesananFragment.newInstance(
+            pesananId    = pesananId,
+            namaPembeli  = p.user?.name ?: "Pelanggan",
+            nomorPembeli = p.user?.noTelp ?: "",
+            autoPesan    = null
+        )
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
 
     private fun konfirmasiTiba() {
         if (isSelesai) return
         isSelesai = true
         binding.btnPesananTiba.isEnabled = false
         binding.btnPesananTiba.text = "Memproses..."
-
-        // Hentikan timer
         timerRunnable?.let { timerHandler.removeCallbacks(it) }
 
-        // Update status ke backend (kirim email otomatis dari server)
         ApiClient.instance.updateStatusAntar(
             session.getBearerToken(),
             pesananId,
@@ -356,55 +426,66 @@ class AnterPesananFragment : Fragment() {
                 if (_binding == null) return
                 if (response.isSuccessful) {
                     markTiba()
-                    binding.btnPesananTiba.text = "✓ Pesanan Tiba!"
-                    Toast.makeText(requireContext(), "Pesanan selesai! Email notifikasi terkirim ke pembeli.", Toast.LENGTH_LONG).show()
-                    // Kembali ke beranda setelah 2 detik
-                    timerHandler.postDelayed({ parentFragmentManager.popBackStack() }, 2000)
-                } else {
+
+                    // ← TAMBAH INI: increment counter pesanan harian (sama seperti selesaikanPesanan di Beranda)
+                    session.tambahPesananHariIni()
+
+                    // Navigasi ke full-screen animasi PesananTibaFragment
+                    val tibaFragment = PesananTibaFragment.newInstance(
+                        namaPembeli = pesanan?.user?.name ?: "Pelanggan",
+                        totalHarga  = pesanan?.totalHarga ?: 0
+                    )
+                    parentFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainer, tibaFragment)
+                        .commit()
+                }
+                else {
                     isSelesai = false
                     binding.btnPesananTiba.isEnabled = true
-                    binding.btnPesananTiba.text = "Pesanan Tiba"
+                    binding.btnPesananTiba.text = "✓ Pesanan Tiba"
                     Toast.makeText(requireContext(), "Gagal update status", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<UpdateStatusResponse>, t: Throwable) {
+                if (_binding == null) return
                 isSelesai = false
                 binding.btnPesananTiba.isEnabled = true
-                binding.btnPesananTiba.text = "Pesanan Tiba"
+                binding.btnPesananTiba.text = "✓ Pesanan Tiba"
                 Toast.makeText(requireContext(), "Error: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
 
-    // ─── Koordinat Gedung ─────────────────────────────────────────────────────
 
-    private fun getCoords(gedungName: String): String = when (gedungName) {
-        "Gedung 1"  -> "-6.9710403,107.6283141"
-        "Gedung 2"  -> "-6.9707509,107.6283404"
-        "Gedung 3"  -> "-6.9704344,107.6283533"
-        "Gedung 4"  -> "-6.9709904,107.6277174"
-        "Gedung 5"  -> "-6.9706729,107.627767"
-        "Gedung 6"  -> "-6.970935,107.6271111"
-        "Gedung 7"  -> "-6.9706223,107.6271815"
-        "Gedung 8"  -> "-6.9702831,107.6272323"
-        "Gedung 9"  -> "-6.9700347,107.6277742"
-        "Gedung 10" -> "-6.9697409,107.6278167"
-        "Gedung 11" -> "-6.9700978,107.6283584"
-        "Gedung 12" -> "-6.9697555,107.6283976"
-        "Gedung A"  -> "-6.9740468,107.6285963"
-        "Gedung B"  -> "-6.9736757,107.6286558"
-        "Gedung C"  -> "-6.9732535,107.6287044"
-        "Gedung D"  -> "-6.9728527,107.6286204"
-        "Gedung E"  -> "-6.9725544,107.6286242"
-        "Gedung F"  -> "-6.9720839,107.6286579"
-        else        -> "-6.9706729,107.627767"
+    private fun getCoords(gedungName: String): String = when {
+        gedungName.contains("Gedung 1",  true) -> "-6.9710403,107.6283141"
+        gedungName.contains("Gedung 2",  true) -> "-6.9707509,107.6283404"
+        gedungName.contains("Gedung 3",  true) -> "-6.9704344,107.6283533"
+        gedungName.contains("Gedung 4",  true) -> "-6.9709904,107.6277174"
+        gedungName.contains("Gedung 5",  true) -> "-6.9706729,107.627767"
+        gedungName.contains("Gedung 6",  true) -> "-6.970935,107.6271111"
+        gedungName.contains("Gedung 7",  true) -> "-6.9706223,107.6271815"
+        gedungName.contains("Gedung 8",  true) -> "-6.9702831,107.6272323"
+        gedungName.contains("Gedung 9",  true) -> "-6.9700347,107.6277742"
+        gedungName.contains("Gedung 10", true) -> "-6.9697409,107.6278167"
+        gedungName.contains("Gedung 11", true) -> "-6.9700978,107.6283584"
+        gedungName.contains("Gedung 12", true) -> "-6.9697555,107.6283976"
+        gedungName.contains("Gedung A",  true) -> "-6.9740468,107.6285963"
+        gedungName.contains("Gedung B",  true) -> "-6.9736757,107.6286558"
+        gedungName.contains("Gedung C",  true) -> "-6.9732535,107.6287044"
+        gedungName.contains("Gedung D",  true) -> "-6.9728527,107.6286204"
+        gedungName.contains("Gedung E",  true) -> "-6.9725544,107.6286242"
+        gedungName.contains("Gedung F",  true) -> "-6.9720839,107.6286579"
+        else                                    -> "-6.9706729,107.627767"
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
         timerRunnable?.let { timerHandler.removeCallbacks(it) }
-        if (::locationCallback.isInitialized) fusedLocationClient.removeLocationUpdates(locationCallback)
+        if (::locationCallback.isInitialized)
+            fusedLocationClient.removeLocationUpdates(locationCallback)
         _binding = null
     }
 }

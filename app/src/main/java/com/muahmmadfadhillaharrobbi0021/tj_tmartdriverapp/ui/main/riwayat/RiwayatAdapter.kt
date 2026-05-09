@@ -11,7 +11,7 @@ import java.util.Locale
 
 class RiwayatAdapter(
     private val list: List<Pesanan>,
-    private val onSelesaiClick: (Int) -> Unit
+    private val onSelesaiClick: ((Int) -> Unit)? = null  // ← opsional, default null
 ) : RecyclerView.Adapter<RiwayatAdapter.ViewHolder>() {
 
     class ViewHolder(val binding: ItemRiwayatBinding) : RecyclerView.ViewHolder(binding.root)
@@ -26,7 +26,6 @@ class RiwayatAdapter(
         val context = holder.itemView.context
 
         with(holder.binding) {
-            // Pastikan ID tvNamaPelanggan, tvTotalHarga, tvStatus sesuai dengan item_riwayat.xml
             tvNamaPelanggan.text = pesanan.user?.name ?: "Pelanggan"
 
             val nf = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
@@ -34,12 +33,7 @@ class RiwayatAdapter(
             tvTotalHarga.text = nf.format(pesanan.totalHarga)
 
             when (pesanan.statusAntar?.lowercase()) {
-                "sedang diantar" -> {
-                    tvStatus.text = "Belum selesai"
-                    tvStatus.setTextColor(context.getColor(android.R.color.holo_red_dark))
-                    btnSelesaikan.visibility = View.VISIBLE
-                }
-                "selesai" -> {
+                "selesai", "tiba" -> {  // ← 'tiba' tampil sebagai "Selesai"
                     tvStatus.text = "Selesai"
                     tvStatus.setTextColor(context.getColor(android.R.color.darker_gray))
                     btnSelesaikan.visibility = View.GONE
@@ -49,9 +43,22 @@ class RiwayatAdapter(
                     tvStatus.setTextColor(context.getColor(android.R.color.holo_orange_dark))
                     btnSelesaikan.visibility = View.GONE
                 }
+                "sedang diantar" -> {
+                    tvStatus.text = "Belum selesai"
+                    tvStatus.setTextColor(context.getColor(android.R.color.holo_red_dark))
+                    if (onSelesaiClick != null) {
+                        btnSelesaikan.visibility = View.VISIBLE
+                        btnSelesaikan.setOnClickListener { onSelesaiClick.invoke(pesanan.id) }
+                    } else {
+                        btnSelesaikan.visibility = View.GONE
+                    }
+                }
+                else -> {
+                    tvStatus.text = "Selesai"
+                    tvStatus.setTextColor(context.getColor(android.R.color.darker_gray))
+                    btnSelesaikan.visibility = View.GONE
+                }
             }
-
-            btnSelesaikan.setOnClickListener { onSelesaiClick(pesanan.id) }
         }
     }
 
