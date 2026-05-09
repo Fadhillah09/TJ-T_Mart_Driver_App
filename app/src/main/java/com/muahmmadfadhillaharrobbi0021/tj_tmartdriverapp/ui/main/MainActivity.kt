@@ -198,6 +198,11 @@ class MainActivity : AppCompatActivity() {
             override fun onResponse(call: Call<MessageResponse>, response: Response<MessageResponse>) {
                 val body = response.body()
                 if (response.isSuccessful && body != null) {
+                    if (body.status == "success"
+                        || body.message?.contains("sudah absen", ignoreCase = true) == true
+                        || body.message?.contains("berhasil", ignoreCase = true) == true) {
+                        sessionManager.setHasAbsenToday(true)
+                    }
                     val judul = if (body.status == "success") "Berhasil" else "Perhatian"
                     showAbsensiDialog(judul, body.message ?: "Proses absensi selesai", body.status == "success")
                 } else {
@@ -251,7 +256,7 @@ class MainActivity : AppCompatActivity() {
         if (hour >= 7) {
             kirimDataAbsensi(lat, lng, "masuk")
         } else {
-            showAbsensiDialog("Perhatian", "Absensi hanya bisa dilakukan mulai jam 07:00 WIB.", false)
+            showAbsensiDialog("Gagal", "Sesi absensi belum dibuka. Silakan kembali jam 07:00 WIB.", false)
         }
     }
 }

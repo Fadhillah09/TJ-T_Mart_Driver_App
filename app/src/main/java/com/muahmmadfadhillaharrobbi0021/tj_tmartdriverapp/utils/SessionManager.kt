@@ -2,6 +2,9 @@ package com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.utils
 
 import android.content.Context
 import android.content.SharedPreferences
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class SessionManager(context: Context) {
     private val pref: SharedPreferences =
@@ -45,7 +48,6 @@ class SessionManager(context: Context) {
 
     fun getFotoProfil(): String = pref.getString("foto_profil", "") ?: ""
 
-    // --- TAMBAHKAN FUNGSI BARU DI SINI ---
 
     fun getPesananHariIni(): Int {
         return pref.getInt("pesanan_hari_ini", 0)
@@ -57,7 +59,6 @@ class SessionManager(context: Context) {
         editor.apply()
     }
 
-    // -------------------------------------
 
     fun rejectPesananLokal(pesananId: Int) {
         val current = pref.getStringSet("rejected_orders", emptySet()) ?: emptySet()
@@ -73,5 +74,19 @@ class SessionManager(context: Context) {
     fun logout() {
         editor.clear()
         editor.apply()
+    }
+    fun setHasAbsenToday(status: Boolean) {
+        editor.putBoolean("has_absen_today", status)
+        editor.putString("last_absen_date", SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(
+            Date()
+        ))
+        editor.apply()
+    }
+
+    fun getHasAbsenToday(): Boolean {
+        val lastDate = pref.getString("last_absen_date", "")
+        val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        if (lastDate != today) return false
+        return pref.getBoolean("has_absen_today", false)
     }
 }

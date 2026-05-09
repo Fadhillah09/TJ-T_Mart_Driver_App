@@ -1,5 +1,6 @@
 package com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main.beranda
 
+import android.R.attr.data
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -20,6 +21,7 @@ import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.PesananResponse
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main.notifikasi.NotifikasiFragment
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main.profil.ProfilFragment
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.utils.SessionManager
+import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.ProfileResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -114,9 +116,20 @@ class BerandaFragment : Fragment() {
         }
 
         updateToggleUI()
-        // ← TAMBAH INI: tampilkan counter pesanan harian dari SharedPreferences saat fragment dibuka
         updatePesananHariIni()
         loadAllData()
+    }
+
+    private fun syncAbsenStatus() {
+        ApiClient.instance.getProfile(session.getBearerToken()).enqueue(object : Callback<ProfileResponse> {
+            override fun onResponse(call: Call<ProfileResponse>, response: Response<ProfileResponse>) {
+                if (response.isSuccessful) {
+                    val isAbsen = response.body()?.data?.isAbsenHariIni ?: false
+                    session.setHasAbsenToday(isAbsen)
+                }
+            }
+            override fun onFailure(call: Call<ProfileResponse>, t: Throwable) {}
+        })
     }
 
     // update tampilan saldo & icon mata
@@ -222,10 +235,33 @@ class BerandaFragment : Fragment() {
     }
 
     private fun loadAllData() {
-        loadPesanan()
-        loadOmset()
-        loadRiwayat()
+        binding.swipeRefresh.isRefreshing = true
+        ApiClient.instance.getProfile(session.getBearerToken()).enqueue(object : Callback<ProfileResponse> {
+            override fun onResponse(call: Call<ProfileResponse>, response: Response<ProfileResponse>) {
+                if (response.isSuccessful) {
+                    val data = response.body()?.data
+                    val isAbsen = data?.isAbsenHariIni ?: false
+
+                    Log.d("DEBUG_ABSEN", "isAbsenHariIni dari server: $isAbsen")
+                    Log.d("DEBUG_ABSEN", "Status lokal sebelum sync: ${session.getHasAbsenToday()}")
+                    session.setHasAbsenToday(isAbsen)
+
+                    Log.d("DEBUG_ABSEN", "Sinkronisasi Berhasil: $isAbsen")
+                }
+                loadPesanan()
+                loadOmset()
+                loadRiwayat()
+            }
+
+            override fun onFailure(call: Call<ProfileResponse>, t: Throwable) {
+                Log.e("DEBUG_ABSEN", "Gagal sinkron: ${t.message}")
+                loadPesanan()
+                loadOmset()
+                loadRiwayat()
+            }
+        })
     }
+
 
     private fun loadPesanan() {
         ApiClient.instance.getPesanan(session.getBearerToken())
@@ -301,6 +337,12 @@ class BerandaFragment : Fragment() {
     }
 
     private fun bukaDetailPesanan(pesanan: Pesanan) {
+        val sudahAbsen = session.getHasAbsenToday()
+        if (!sudahAbsen) {
+            showDialogHarusAbsen()
+            return
+        }
+
         val detailFragment = DetailPesananFragment.newInstance(pesanan.id)
         parentFragmentManager.beginTransaction()
             .setCustomAnimations(
@@ -310,6 +352,17 @@ class BerandaFragment : Fragment() {
             .replace(R.id.fragmentContainer, detailFragment)
             .addToBackStack(null)
             .commit()
+    }
+    private fun showDialogHarusAbsen() {
+        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle("Akses Dibatasi")
+            .setMessage("Anda harus melakukan absensi terlebih dahulu sebelum melihat detail atau mengambil pesanan.")
+            .setPositiveButton("Absen Sekarang") { _, _ ->
+                // Arahkan untuk klik tombol absen di MainActivity
+                Toast.makeText(context, "Klik tombol Fingerprint di bawah", Toast.LENGTH_LONG).show()
+            }
+            .setNegativeButton("Batal", null)
+            .show()
     }
 
     private fun claimPesanan(id: Int) {

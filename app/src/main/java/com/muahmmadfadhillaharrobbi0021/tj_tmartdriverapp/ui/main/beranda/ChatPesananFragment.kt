@@ -157,7 +157,6 @@ class ChatPesananFragment : Fragment() {
 
     private fun setupHeader() {
         binding.tvNamaChatHeader.text = namaPembeli
-        binding.tvStatusChat.text     = "Pesanan #$pesananId"
 
         binding.ivBack.setOnClickListener { parentFragmentManager.popBackStack() }
 

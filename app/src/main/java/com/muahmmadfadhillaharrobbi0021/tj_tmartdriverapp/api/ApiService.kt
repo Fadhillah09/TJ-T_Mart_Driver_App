@@ -65,9 +65,13 @@ interface ApiService {
         @Query("koordinat") koordinat: String
     ): Call<MessageResponse>
     @FormUrlEncoded
-    @POST("driver/checkout") // Sesuaikan dengan route di Laravel kamu
+    @POST("driver/checkout")
     fun submitCheckout(
         @Header("Authorization") token: String,
         @Field("koordinat") koordinat: String
     ): Call<MessageResponse>
+    @GET("driver/profile")
+    fun getProfile(
+        @Header("Authorization") token: String
+    ): Call<ProfileResponse>
 }
