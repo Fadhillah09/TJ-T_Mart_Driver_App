@@ -235,26 +235,7 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
-    private fun kirimDataCheckout(lat: Double, lng: Double) {
-        val koordinat = "$lat,$lng"
-        val token = sessionManager.getBearerToken() ?: ""
 
-        ApiClient.instance.submitCheckout(token, koordinat).enqueue(object : Callback<MessageResponse> {
-            override fun onResponse(call: Call<MessageResponse>, response: Response<MessageResponse>) {
-                val body = response.body()
-                if (response.isSuccessful && body != null) {
-                    showAbsensiDialog("Berhasil", body.message ?: "Checkout berhasil diproses", true)
-                } else {
-                    val errorMsg = response.errorBody()?.string() ?: "Unknown Error"
-                    showAbsensiDialog("Gagal", "Info: $errorMsg", false)
-                }
-            }
-
-            override fun onFailure(call: Call<MessageResponse>, t: Throwable) {
-                showAbsensiDialog("Error", "Koneksi Gagal", false)
-            }
-        })
-    }
     private fun showAbsensiDialog(title: String, message: String, isSuccess: Boolean) {
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle(title)
@@ -267,12 +248,10 @@ class MainActivity : AppCompatActivity() {
         val now = Calendar.getInstance()
         val hour = now.get(Calendar.HOUR_OF_DAY)
 
-        if (hour < 11) {
-            // Pagi hari: Panggil API submitAbsensi (Masuk)
+        if (hour >= 7) {
             kirimDataAbsensi(lat, lng, "masuk")
-        } else if (hour >= 15) {
-            // Sore hari: Panggil API submitCheckout (Pulang)
-            kirimDataCheckout(lat, lng)
+        } else {
+            showAbsensiDialog("Perhatian", "Absensi hanya bisa dilakukan mulai jam 07:00 WIB.", false)
         }
     }
 }

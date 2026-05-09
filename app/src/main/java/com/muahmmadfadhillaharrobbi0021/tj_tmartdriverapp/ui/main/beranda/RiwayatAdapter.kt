@@ -45,6 +45,7 @@ class RiwayatAdapter(private val list: List<Pesanan>) :
                 }
                 else -> {
                     tvStatus.text = pesanan.statusAntar ?: "-"
+                    tvStatus.setTextColor(context.getColor(android.R.color.holo_orange_dark))
                     tvStatus.setBackgroundResource(R.drawable.bg_badge_belum_selesai)
                 }
             }
