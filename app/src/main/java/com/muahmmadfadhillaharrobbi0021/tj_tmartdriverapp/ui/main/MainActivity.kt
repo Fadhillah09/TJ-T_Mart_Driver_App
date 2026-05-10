@@ -23,6 +23,12 @@ import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.databinding.ActivityMa
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.MessageResponse
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.auth.LoginActivity
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main.beranda.BerandaFragment
+import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main.notifikasi.InAppNotificationPopup
+import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main.notifikasi.NotifikasiFragment
+import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main.notifikasi.NotifikasiItem
+import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main.notifikasi.NotifikasiStorage
+import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main.notifikasi.NotifType
+import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main.notifikasi.PesananPoller
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main.omset.OmsetFragment
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main.pengaturan.PengaturanFragment
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main.riwayat.RiwayatFragment
@@ -37,6 +43,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var sessionManager: SessionManager
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var pesananPoller: PesananPoller
 
     // Koordinat Telkom University Bojongsoang
     private val TARGET_LAT = -6.971306
@@ -65,6 +72,7 @@ class MainActivity : AppCompatActivity() {
 
         loadFragment(BerandaFragment())
         startAbsensiPulseAnimation()
+        startGlobalPoller()
 
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             val fragment: Fragment = when (item.itemId) {
@@ -78,10 +86,36 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
-        // ALUR PERBAIKAN: Klik tombol langsung memicu kamera
         binding.btnAbsensi.setOnClickListener {
             bukakKamera()
         }
+    }
+
+    private fun startGlobalPoller() {
+        // Load notifikasi dari storage ke allNotifikasi jika belum ada
+        if (NotifikasiFragment.allNotifikasi.isEmpty()) {
+            val saved = NotifikasiStorage.load(this)
+            val sorted = saved.sortedByDescending { it.timestamp }
+            NotifikasiFragment.allNotifikasi.addAll(sorted)
+        }
+
+        pesananPoller = PesananPoller(
+            context = this,
+            bearerToken = sessionManager.getBearerToken(),
+            onPesananBaru = { pesananId ->
+                // Simpan ke storage setiap ada pesanan baru
+                NotifikasiStorage.save(this, NotifikasiFragment.allNotifikasi)
+            }
+        )
+        pesananPoller.start()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (::pesananPoller.isInitialized) {
+            pesananPoller.stop()
+        }
+        InAppNotificationPopup.dismiss(this)
     }
 
     private fun bukakKamera() {
@@ -101,7 +135,6 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        // Validasi dilakukan SETELAH foto diambil
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             checkLocationAndTimeAfterScan()
         }
@@ -109,28 +142,23 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkLocationAndTimeAfterScan() {
 
-        // 1. VALIDASI WAKTU (06:30 - 08:00 WIB Jakarta)
         val now = Calendar.getInstance()
         val hour = now.get(Calendar.HOUR_OF_DAY)
         val minute = now.get(Calendar.MINUTE)
 
         val totalMinutes = (hour * 60) + minute
-        val startPagi = (6 * 60) + 30 // 06:30
-        val endPagi = 8 * 60         // 08:00
-        val startSore = 15 * 60      // 15:00
+        val startPagi = (6 * 60) + 30
+        val endPagi = 8 * 60
+        val startSore = 15 * 60
 
         val isPagi = totalMinutes in startPagi..endPagi
         val isSore = totalMinutes >= startSore
-        // Jika ingin menambah absen sore, gunakan: val isSore = (hour >= 15)
 
-
-        // 2. CEK IZIN LOKASI
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION_PERMISSION)
             return
         }
 
-        // 3. VALIDASI JARAK RADIUS (Pesan "Di luar jangkauan" muncul di sini)
         fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
             .addOnSuccessListener { location: Location? ->
                 if (location != null) {
@@ -141,7 +169,6 @@ class MainActivity : AppCompatActivity() {
                     if (distance <= MAX_RADIUS) {
                         tentukanKirimAbsen(location.latitude, location.longitude)
                         Toast.makeText(this, "Absensi Berhasil dikirim!", Toast.LENGTH_SHORT).show()
-                        // Panggil fungsi kirim data ke API Laravel tubes_pbw2 di sini
                     } else {
                         showAbsensiDialog("Gagal", "Anda di luar jangkauan Telkom! Jarak: ${distance.toInt()}m", false)
                     }
@@ -158,7 +185,6 @@ class MainActivity : AppCompatActivity() {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) bukakKamera()
             }
             REQUEST_LOCATION_PERMISSION -> {
-                // Jika izin baru diberikan, ulangi pengecekan setelah scan
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) checkLocationAndTimeAfterScan()
             }
         }
@@ -189,7 +215,7 @@ class MainActivity : AppCompatActivity() {
         animateRing(binding.ringOuter, 0L)
         animateRing(binding.ringInner, 900L)
     }
-    // Tambahkan fungsi baru di dalam class MainActivity
+
     private fun kirimDataAbsensi(lat: Double, lng: Double, tipe: String) {
         val koordinat = "$lat,$lng"
         val token = sessionManager.getBearerToken()
