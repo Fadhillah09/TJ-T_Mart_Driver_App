@@ -12,6 +12,7 @@ data class Pesanan(
     @SerializedName("kurir_id") val kurirId: Int?,
     @SerializedName("metode_pembayaran") val metodePembayaran: String?,
     @SerializedName("created_at") val createdAt: String?,
+    @SerializedName("updated_at") val updatedAt: String?,
     val user: UserPemesan?,
     @SerializedName("details") val details: List<ItemPesanan>?,
     @SerializedName("alamat_display") val alamatDisplay: String?,
@@ -25,11 +26,14 @@ data class Pesanan(
         val subtotal: Int?,
         @SerializedName("foto_produk") val fotoProduk: String?
     )
+
     data class UserPemesan(
+        val id: Int?,
         val name: String?,
         @SerializedName("no_telp") val noTelp: String?,
-        @SerializedName("alamat_gedung") val alamatGedung: String?,
+        @SerializedName("lokasi_id") val lokasiId: Int?,       // ← tambah ini
         @SerializedName("nomor_kamar") val nomorKamar: String?,
+        @SerializedName("alamat_gedung") val alamatGedung: String?,
         val gambar: String?,
         val lokasi: LokasiData?
     ) {

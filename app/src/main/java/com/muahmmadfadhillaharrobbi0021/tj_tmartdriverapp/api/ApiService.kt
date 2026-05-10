@@ -58,20 +58,31 @@ interface ApiService {
         @Path("id") id: Int,
         @Body body: UpdateStatusRequest
     ): Call<UpdateStatusResponse>
+
     @Headers("Accept: application/json")
     @POST("driver/absensi")
     fun prosesAbsen(
         @Header("Authorization") token: String,
         @Query("koordinat") koordinat: String
     ): Call<MessageResponse>
+
     @FormUrlEncoded
     @POST("driver/checkout")
     fun submitCheckout(
         @Header("Authorization") token: String,
         @Field("koordinat") koordinat: String
     ): Call<MessageResponse>
+
     @GET("driver/profile")
     fun getProfile(
         @Header("Authorization") token: String
     ): Call<ProfileResponse>
+
+    // Endpoint grafik pendapatan (filter: minggu / bulan)
+    @Headers("Accept: application/json")
+    @GET("driver/grafik")
+    fun getGrafik(
+        @Header("Authorization") token: String,
+        @Query("filter") filter: String
+    ): Call<GrafikResponse>
 }
