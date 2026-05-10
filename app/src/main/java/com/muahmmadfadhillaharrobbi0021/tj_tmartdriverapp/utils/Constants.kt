@@ -1,14 +1,17 @@
 package com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.utils
 
 object Constants {
-    // Alamat utama dari Cloudflare Worker
+    // Ganti sesuai kebutuhan: true = development/emulator, false = production
+    private const val IS_DEVELOPMENT = true
+
     private const val CLOUDFLARE_URL = "https://proud-base-e00d.fadhillaharrobbi.workers.dev/"
+    private const val LOCAL_URL = "http://10.0.2.2:8000/"
 
     // Gunakan ini untuk mengambil foto (tanpa folder api)
-    const val BASE_URL = CLOUDFLARE_URL
+    val BASE_URL = if (IS_DEVELOPMENT) LOCAL_URL else CLOUDFLARE_URL
 
     // Gunakan ini untuk request data (dengan folder api)
-    const val API_BASE_URL = "${CLOUDFLARE_URL}api/"
+    val API_BASE_URL = if (IS_DEVELOPMENT) "${LOCAL_URL}api/" else "${CLOUDFLARE_URL}api/"
 
     // SharedPreferences
     const val PREF_NAME = "TJMartDriverPref"

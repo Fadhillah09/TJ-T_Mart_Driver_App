@@ -37,9 +37,14 @@ class SessionManager(context: Context) {
     fun getNoTelp(): String = pref.getString(Constants.KEY_USER_TELP, "") ?: ""
     fun getNoRekening(): String = pref.getString(Constants.KEY_USER_REKENING, "") ?: ""
 
+    fun saveNoRekening(noRek: String) {
+        editor.putString(Constants.KEY_USER_REKENING, noRek)
+        editor.apply()
+    }
+
     fun getBearerToken(): String = "Bearer ${getToken()}"
 
-    fun getBaseUrl(): String = Constants.BASE_URL.removeSuffix("/api/")
+    fun getBaseUrl(): String = Constants.BASE_URL.trimEnd('/')
 
     fun saveFotoProfil(url: String) {
         editor.putString("foto_profil", url)
@@ -48,6 +53,12 @@ class SessionManager(context: Context) {
 
     fun getFotoProfil(): String = pref.getString("foto_profil", "") ?: ""
 
+    fun saveNamaBank(namaBank: String) {
+        editor.putString("nama_bank", namaBank)
+        editor.apply()
+    }
+
+    fun getNamaBank(): String = pref.getString("nama_bank", "") ?: ""
 
     fun getPesananHariIni(): Int {
         return pref.getInt("pesanan_hari_ini", 0)
@@ -58,7 +69,6 @@ class SessionManager(context: Context) {
         editor.putInt("pesanan_hari_ini", currentCount + 1)
         editor.apply()
     }
-
 
     fun rejectPesananLokal(pesananId: Int) {
         val current = pref.getStringSet("rejected_orders", emptySet()) ?: emptySet()
@@ -75,6 +85,7 @@ class SessionManager(context: Context) {
         editor.clear()
         editor.apply()
     }
+
     fun setHasAbsenToday(status: Boolean) {
         editor.putBoolean("has_absen_today", status)
         editor.putString("last_absen_date", SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(

@@ -84,6 +84,17 @@ class ProfilFragment : Fragment() {
         binding.tvNoHp.text   = "No HP : ${sessionManager.getNoTelp()}"
         binding.tvEmail.text  = "Email : ${sessionManager.getEmail()}"
         binding.tvLokasi.text = "Lokasi : Bandung"
+        binding.tvNamaBank.text = "Nama Bank : ${sessionManager.getNamaBank()}"
+        binding.tvNomorRek.text = "No rekening : ${sessionManager.getNoRekening()}"
+
+        val foto = sessionManager.getFotoProfil()
+        if (foto.isNotEmpty()) {
+            Glide.with(requireContext())
+                .load(foto)
+                .placeholder(R.drawable.ic_back)
+                .circleCrop()
+                .into(binding.imgProfile)
+        }
     }
 
     private fun loadProfileFromServer() {
@@ -101,7 +112,9 @@ class ProfilFragment : Fragment() {
                     .build()
 
                 val response = client.newCall(request).execute()
-                val body     = response.body?.string() ?: return@launch
+                val bodyString = response.body?.string()
+                Log.d("PROFILE_RESPONSE", "Code: ${response.code}, Body: $bodyString")
+                val body = bodyString ?: return@launch
 
                 if (response.isSuccessful) {
                     val json = JSONObject(body)
@@ -133,12 +146,17 @@ class ProfilFragment : Fragment() {
                                 .into(binding.imgProfile)
                         }
 
+                        // Simpan ke session agar tersimpan saat keluar halaman
+                        sessionManager.saveNamaBank(namaBank)
+                        sessionManager.saveNoRekening(noRek)
+
                         binding.tvNamaBank.text = "Nama Bank : $namaBank"
                         binding.tvNomorRek.text = "No rekening : $noRek"
                     }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+                Log.e("PROFILE_ERROR", "Error: ${e.message}")
             }
         }
     }
@@ -209,6 +227,7 @@ class ProfilFragment : Fragment() {
         val client   = OkHttpClient()
         val response = client.newCall(request).execute()
         val body     = response.body?.string() ?: ""
+        Log.d("PROFILE_RESPONSE", body)
 
         withContext(Dispatchers.Main) {
             if (response.isSuccessful) {

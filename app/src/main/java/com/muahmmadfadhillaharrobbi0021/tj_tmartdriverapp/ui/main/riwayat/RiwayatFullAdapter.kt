@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.R
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.databinding.ItemRiwayatFullBinding
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.Pesanan
@@ -122,6 +123,18 @@ class RiwayatFullAdapter(
                 b.tvNamaPelanggan.text = pesanan.user?.name ?: "Pelanggan"
                 val jumlahItem = pesanan.details?.sumOf { it.qty ?: it.jumlah ?: 0 } ?: 0
                 b.tvJumlahPesanan.text = "Total : $jumlahItem Pesanan"
+
+                // Load foto pelanggan
+                val fotoUrl = pesanan.user?.gambar
+                if (!fotoUrl.isNullOrEmpty()) {
+                    Glide.with(context)
+                        .load("http://10.0.2.2:8000/storage/$fotoUrl")
+                        .placeholder(R.drawable.ic_default_avatar)
+                        .circleCrop()
+                        .into(b.ivAvatarUser)
+                } else {
+                    b.ivAvatarUser.setImageResource(R.drawable.ic_default_avatar)
+                }
 
                 // Status badge
                 when (pesanan.statusAntar?.lowercase()) {
