@@ -7,14 +7,14 @@
     android:background="#F8F9FA">
 
     <!-- Header -->
-    <LinearLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/headerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:background="@color/white"
         android:elevation="4dp">
 
+        <!-- Title Bar -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="56dp"
@@ -135,24 +135,23 @@
             </LinearLayout>
         </HorizontalScrollView>
 
-    </LinearLayout>
+    </com.google.android.material.appbar.AppBarLayout>
 
     <!-- Content -->
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_anchor="@id/headerLayout"
-        app:layout_anchorGravity="bottom">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvRiwayatFull"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingTop="8dp"
-            android:paddingBottom="80dp"
             android:clipToPadding="false"
-            android:overScrollMode="never" />
+            android:overScrollMode="never"
+            android:paddingTop="8dp"
+            android:paddingBottom="80dp" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 

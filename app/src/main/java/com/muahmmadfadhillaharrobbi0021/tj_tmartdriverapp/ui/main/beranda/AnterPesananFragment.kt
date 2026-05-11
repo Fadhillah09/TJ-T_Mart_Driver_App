@@ -407,7 +407,6 @@ class AnterPesananFragment : Fragment() {
             .commit()
     }
 
-
     private fun konfirmasiTiba() {
         if (isSelesai) return
         isSelesai = true
@@ -415,10 +414,27 @@ class AnterPesananFragment : Fragment() {
         binding.btnPesananTiba.text = "Memproses..."
         timerRunnable?.let { timerHandler.removeCallbacks(it) }
 
+        // Ambil jarak & durasi saat ini
+        val jarakTeks = binding.tvJarak.text.toString()
+            .replace("Jarak: ", "").trim()
+        val jam = elapsedSeconds / 3600
+        val mnt = (elapsedSeconds % 3600) / 60
+        val dtk = elapsedSeconds % 60
+        val durasiTeks = if (jam > 0)
+            String.format("%02d jam %02d menit %02d detik", jam, mnt, dtk)
+        else if (mnt > 0)
+            String.format("%02d menit %02d detik", mnt, dtk)
+        else
+            String.format("%02d detik", dtk)
+
         ApiClient.instance.updateStatusAntar(
             session.getBearerToken(),
             pesananId,
-            UpdateStatusRequest(status_antar = "tiba")
+            UpdateStatusRequest(
+                status_antar = "tiba",
+                jarak = jarakTeks,
+                durasi = durasiTeks
+            )
         ).enqueue(object : Callback<UpdateStatusResponse> {
             override fun onResponse(
                 call: Call<UpdateStatusResponse>, response: Response<UpdateStatusResponse>

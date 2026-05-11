@@ -16,7 +16,10 @@ data class Pesanan(
     val user: UserPemesan?,
     @SerializedName("details") val details: List<ItemPesanan>?,
     @SerializedName("alamat_display") val alamatDisplay: String?,
-    @SerializedName("pembayaran_display") val pembayaranDisplay: String?
+    @SerializedName("pembayaran_display") val pembayaranDisplay: String?,
+    @SerializedName("nama_mart") val namaMart: String?,
+    @SerializedName("jarak") val jarak: String?,
+    @SerializedName("durasi") val durasi: String?
 ) {
     data class ItemPesanan(
         @SerializedName("nama_produk") val namaProduk: String?,
@@ -50,6 +53,9 @@ data class Pesanan(
     data class LokasiData(
         val id: Int,
         @SerializedName("nama_lokasi") val namaLokasi: String?,
-        @SerializedName("nama_gedung") val namaGedung: String?
+        @SerializedName("nama_gedung") val namaGedung: String?,
+        val jarak: String?,
+        val durasi: String?,
+        @SerializedName("nama_mart") val namaMart: String?,
     )
 }

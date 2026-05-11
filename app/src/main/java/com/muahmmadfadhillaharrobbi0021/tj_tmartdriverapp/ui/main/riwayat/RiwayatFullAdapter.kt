@@ -1,5 +1,6 @@
 package com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main.riwayat
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +10,7 @@ import com.bumptech.glide.Glide
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.R
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.databinding.ItemRiwayatFullBinding
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.Pesanan
+import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.utils.Constants
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -34,7 +36,9 @@ class RiwayatFullAdapter(
 
     private fun buildItems(pesananList: List<Pesanan>): List<RiwayatItem> {
         val result = mutableListOf<RiwayatItem>()
-        val grouped = pesananList.groupBy { formatTanggal(it.createdAt) }
+        val grouped = pesananList.groupBy {
+            formatTanggal(it.createdAt ?: it.updatedAt)  // ← fallback ke updatedAt
+        }
         for ((tanggal, items) in grouped) {
             result.add(RiwayatItem.Header(tanggal))
             items.forEach { result.add(RiwayatItem.Card(it)) }
@@ -46,16 +50,18 @@ class RiwayatFullAdapter(
         if (raw == null) return "Tanggal tidak diketahui"
         return try {
             val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'", Locale.getDefault())
+            sdf.isLenient = true
             val date = sdf.parse(raw) ?: return raw
-            val out = SimpleDateFormat("d MMMM yyyy", Locale("id", "ID"))
-            out.format(date)
+            SimpleDateFormat("d MMMM yyyy", Locale("id", "ID")).format(date)
         } catch (e: Exception) {
             try {
-                val sdf2 = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                val sdf2 = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+                sdf2.isLenient = true
                 val date = sdf2.parse(raw) ?: return raw
-                val out = SimpleDateFormat("d MMMM yyyy", Locale("id", "ID"))
-                out.format(date)
-            } catch (e2: Exception) { raw }
+                SimpleDateFormat("d MMMM yyyy", Locale("id", "ID")).format(date)
+            } catch (e2: Exception) {
+                raw.take(10) // fallback tampilkan yyyy-MM-dd
+            }
         }
     }
 
@@ -63,15 +69,15 @@ class RiwayatFullAdapter(
         if (raw == null) return ""
         return try {
             val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'", Locale.getDefault())
+            sdf.isLenient = true
             val date = sdf.parse(raw) ?: return ""
-            val out = SimpleDateFormat("HH.mm 'WIB'", Locale.getDefault())
-            out.format(date)
+            SimpleDateFormat("HH.mm 'WIB'", Locale.getDefault()).format(date)
         } catch (e: Exception) {
             try {
-                val sdf2 = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                val sdf2 = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+                sdf2.isLenient = true
                 val date = sdf2.parse(raw) ?: return ""
-                val out = SimpleDateFormat("HH.mm 'WIB'", Locale.getDefault())
-                out.format(date)
+                SimpleDateFormat("HH.mm 'WIB'", Locale.getDefault()).format(date)
             } catch (e2: Exception) { "" }
         }
     }
@@ -109,15 +115,18 @@ class RiwayatFullAdapter(
             }
             is RiwayatItem.Card -> {
                 val pesanan = item.pesanan
+                Log.d("DEBUG_PESANAN", pesanan.toString())
                 val b = (holder as CardViewHolder).binding
+                Log.d("TANGGAL_RAW", "createdAt = ${pesanan.createdAt}")
+
                 val context = b.root.context
                 val nf = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
                 nf.maximumFractionDigits = 0
 
                 // Rute
-                b.tvOrigin.text = "TJ Mart Putri"
+                b.tvOrigin.text = pesanan.user?.lokasi?.namaMart ?: pesanan.namaMart ?: "TJ Mart Putri"
                 b.tvDestination.text = pesanan.alamatDisplay ?: pesanan.user?.getNamaLokasiLengkap() ?: "-"
-                b.tvWaktu.text = formatJam(pesanan.createdAt)
+                b.tvWaktu.text = formatJam(pesanan.createdAt ?: pesanan.updatedAt)
 
                 // Nama pelanggan & jumlah item
                 b.tvNamaPelanggan.text = pesanan.user?.name ?: "Pelanggan"
@@ -126,9 +135,11 @@ class RiwayatFullAdapter(
 
                 // Load foto pelanggan
                 val fotoUrl = pesanan.user?.gambar
+                Log.d("FOTO_URL", "gambar = $fotoUrl")
+
                 if (!fotoUrl.isNullOrEmpty()) {
                     Glide.with(context)
-                        .load("http://10.0.2.2:8000/storage/$fotoUrl")
+                        .load("${Constants.BASE_URL}storage/$fotoUrl")
                         .placeholder(R.drawable.ic_default_avatar)
                         .circleCrop()
                         .into(b.ivAvatarUser)
@@ -194,12 +205,11 @@ class RiwayatFullAdapter(
                 }
 
                 // Footer: Jarak, Durasi, Ongkir (statis karena tidak ada di model)
-                b.tvJarak.text = "800 m"
-                b.tvDurasi.text = "15 menit"
-                b.tvOngkir.text = nf.format(pesanan.totalHarga)
+                b.tvJarak.text = pesanan.user?.lokasi?.jarak ?: pesanan.jarak ?: "- m"
+                b.tvDurasi.text = pesanan.user?.lokasi?.durasi ?: pesanan.durasi ?: "- menit"
+                b.tvTotal.text = nf.format(pesanan.totalHarga)
             }
         }
     }
-
     override fun getItemCount(): Int = items.size
 }

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -22,16 +21,16 @@
         android:paddingTop="12dp"
         android:paddingBottom="8dp">
 
-        <!-- Icon toko -->
+        <!-- Icon mart -->
         <ImageView
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:src="@drawable/ic_store"
+            android:src="@drawable/ic_mart"
             android:background="@drawable/bg_icon_store"
             android:padding="6dp"
             android:scaleType="centerInside" />
 
-        <!-- Rute -->
+        <!-- Rute + Waktu -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -56,8 +55,8 @@
                     android:maxLines="1" />
 
                 <ImageView
-                    android:layout_width="14dp"
-                    android:layout_height="14dp"
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
                     android:src="@android:drawable/arrow_down_float"
                     android:rotation="-90"
                     android:layout_marginStart="4dp"
@@ -181,7 +180,7 @@
         android:paddingTop="10dp"
         android:paddingBottom="4dp" />
 
-    <!-- RecyclerView Items (max 3, collapsible) -->
+    <!-- RecyclerView Items -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvItemPesanan"
         android:layout_width="match_parent"
@@ -212,7 +211,7 @@
         android:layout_marginStart="14dp"
         android:layout_marginEnd="14dp" />
 
-    <!-- Footer: Jarak, Durasi, Ongkir -->
+    <!-- Footer: Jarak, Durasi, Total -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -222,11 +221,13 @@
         android:paddingTop="10dp"
         android:paddingBottom="12dp">
 
+        <!-- Jarak: rata kiri -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:gravity="start">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -247,11 +248,13 @@
 
         </LinearLayout>
 
+        <!-- Durasi: center -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:gravity="center">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -272,21 +275,23 @@
 
         </LinearLayout>
 
+        <!-- Total: rata kanan -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:gravity="end">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ongkir"
+                android:text="Total"
                 android:textSize="11sp"
                 android:textColor="@color/text_sub" />
 
             <TextView
-                android:id="@+id/tvOngkir"
+                android:id="@+id/tvTotal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Rp.15.000"
@@ -299,7 +304,7 @@
 
     </LinearLayout>
 
-    <!-- Tombol Selesaikan (untuk status sedang diantar) -->
+    <!-- Tombol Selesaikan -->
     <Button
         android:id="@+id/btnSelesaikan"
         android:layout_width="match_parent"

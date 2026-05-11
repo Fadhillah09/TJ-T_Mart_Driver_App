@@ -126,6 +126,9 @@ class RiwayatFragment : Fragment() {
                     binding.swipeRefresh.isRefreshing = false
                     if (response.isSuccessful && response.body() != null) {
                         fullList = response.body()?.data ?: emptyList()
+
+                        val raw = fullList.firstOrNull()
+
                         applyFilterAndSearch()
                     }
                 }
