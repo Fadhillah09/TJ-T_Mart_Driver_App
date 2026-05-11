@@ -6,9 +6,7 @@
     android:orientation="vertical"
     android:background="#F5F5F5">
 
-    <!-- ═══════════════════════════════════════════
-         TOP APP BAR — Konsisten Tema Telkom Merah
-    ═══════════════════════════════════════════ -->
+    <!-- TOP APP BAR -->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
@@ -17,7 +15,6 @@
         android:paddingEnd="8dp"
         android:elevation="4dp">
 
-        <!-- Tombol back -->
         <ImageView
             android:id="@+id/ivBack"
             android:layout_width="40dp"
@@ -28,7 +25,6 @@
             android:tint="@color/white"
             android:padding="8dp" />
 
-        <!-- Avatar + Nama pembeli (center) -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -68,7 +64,6 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Tombol Telepon VoIP — kanan -->
         <ImageView
             android:id="@+id/btnVoipCall"
             android:layout_width="40dp"
@@ -81,9 +76,7 @@
             android:background="?attr/selectableItemBackgroundBorderless" />
     </RelativeLayout>
 
-    <!-- ═══════════════════════════════════════════
-         DAFTAR PESAN (RecyclerView)
-    ═══════════════════════════════════════════ -->
+    <!-- DAFTAR PESAN — stackFromEnd: pesan terbaru di bawah seperti WA -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvChat"
         android:layout_width="match_parent"
@@ -93,9 +86,7 @@
         android:clipToPadding="false"
         android:scrollbars="none" />
 
-    <!-- ═══════════════════════════════════════════
-         PANEL INPUT CHAT
-    ═══════════════════════════════════════════ -->
+    <!-- PANEL INPUT CHAT -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -103,13 +94,12 @@
         android:background="@color/white"
         android:elevation="8dp">
 
-        <!-- Divider tipis -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="#EEEEEE" />
 
-        <!-- Preview media yang dipilih (tersembunyi jika tidak ada) -->
+        <!-- Preview media -->
         <LinearLayout
             android:id="@+id/layoutMediaPreview"
             android:layout_width="match_parent"
@@ -156,27 +146,29 @@
             android:gravity="center_vertical"
             android:padding="8dp">
 
-            <!-- Tombol Kirim Foto -->
+            <!-- Kamera GABUNG foto+video. Hide saat mengetik -->
             <ImageView
-                android:id="@+id/btnKirimFoto"
+                android:id="@+id/btnKamera"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
                 android:src="@drawable/ic_photo_camera"
                 android:tint="@color/telkom_red"
                 android:padding="4dp"
                 android:layout_marginEnd="4dp"
-                android:background="?attr/selectableItemBackgroundBorderless" />
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:visibility="visible" />
 
-            <!-- Tombol Kirim Video -->
+            <!-- Voice Note. Hide saat mengetik -->
             <ImageView
-                android:id="@+id/btnKirimVideo"
+                android:id="@+id/btnVoiceNote"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
-                android:src="@drawable/ic_videocam"
+                android:src="@drawable/ic_mic"
                 android:tint="@color/telkom_red"
                 android:padding="4dp"
                 android:layout_marginEnd="6dp"
-                android:background="?attr/selectableItemBackgroundBorderless" />
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:visibility="visible" />
 
             <!-- EditText pesan -->
             <com.google.android.material.textfield.TextInputEditText

@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.R
@@ -14,7 +13,6 @@ class ChatAdapter(
     private val messages: List<ChatMessage>
 ) : RecyclerView.Adapter<ChatAdapter.ChatVH>() {
 
-    // ViewHolder types
     companion object {
         private const val TYPE_DRIVER   = 1  // Driver (kanan, merah)
         private const val TYPE_CUSTOMER = 2  // Customer (kiri, abu)
@@ -30,9 +28,7 @@ class ChatAdapter(
         return ChatVH(view)
     }
 
-    override fun onBindViewHolder(holder: ChatVH, position: Int) {
-        holder.bind(messages[position])
-    }
+    override fun onBindViewHolder(holder: ChatVH, position: Int) = holder.bind(messages[position])
 
     override fun getItemCount() = messages.size
 
@@ -46,18 +42,19 @@ class ChatAdapter(
         private val badgeVideo: TextView? = itemView.findViewById(R.id.tvBadgeVideo)
 
         fun bind(msg: ChatMessage) {
+            // Reset semua dulu agar tidak ada tampilan ganda
+            tvIsi?.visibility      = View.GONE
+            ivMedia?.visibility    = View.GONE
+            badgeVideo?.visibility = View.GONE
+
             when (msg.tipe) {
                 TipePesan.TEKS -> {
                     tvIsi?.text       = msg.isi
                     tvIsi?.visibility = View.VISIBLE
-                    ivMedia?.visibility  = View.GONE
-                    badgeVideo?.visibility = View.GONE
                 }
 
                 TipePesan.GAMBAR -> {
-                    tvIsi?.visibility   = View.GONE
                     ivMedia?.visibility = View.VISIBLE
-                    badgeVideo?.visibility = View.GONE
                     try {
                         ivMedia?.setImageURI(Uri.parse(msg.isi))
                     } catch (e: Exception) {
@@ -66,12 +63,12 @@ class ChatAdapter(
                 }
 
                 TipePesan.VIDEO -> {
-                    tvIsi?.visibility      = View.GONE
                     ivMedia?.visibility    = View.VISIBLE
                     badgeVideo?.visibility = View.VISIBLE
                     ivMedia?.setImageResource(R.drawable.ic_videocam)
                 }
             }
+
             tvWaktu?.text = msg.waktu
         }
     }

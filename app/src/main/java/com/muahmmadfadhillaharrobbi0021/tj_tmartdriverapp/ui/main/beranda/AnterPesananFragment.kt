@@ -267,20 +267,14 @@ class AnterPesananFragment : Fragment() {
      * Pesan disimpan ke ChatRepository / database lokal sehingga pelanggan melihatnya di sisi mereka.
      */
     private fun kirimAutoChatHampirTiba() {
-        // Simpan pesan otomatis via ChatRepository (Room/Firestore/API sesuai implementasi chat)
-        // Contoh menggunakan API endpoint chat:
-        // ApiClient.instance.kirimPesan(
-        //     token = session.getBearerToken(),
-        //     pesananId = pesananId,
-        //     pesan = "Pesanan Anda sebentar lagi telah sampai! 🛵"
-        // ).enqueue(...)
 
         // Untuk sementara, buka fragment chat dan sisipkan pesan otomatis
         val fragment = ChatPesananFragment.newInstance(
             pesananId  = pesananId,
             namaPembeli = pesanan?.user?.name ?: "Pelanggan",
             nomorPembeli = pesanan?.user?.noTelp ?: "",
-            autoPesan  = "Pesanan Anda sebentar lagi telah sampai! 🛵"
+            autoPesan  = "Pesanan Anda sebentar lagi telah sampai! 🛵",
+            fotoPembeli  = pesanan?.user?.gambar
         )
         parentFragmentManager.beginTransaction()
             .replace(R.id.fragmentContainer, fragment)
@@ -399,7 +393,8 @@ class AnterPesananFragment : Fragment() {
             pesananId    = pesananId,
             namaPembeli  = p.user?.name ?: "Pelanggan",
             nomorPembeli = p.user?.noTelp ?: "",
-            autoPesan    = null
+            autoPesan    = null,
+            fotoPembeli  = p.user?.gambar
         )
         parentFragmentManager.beginTransaction()
             .replace(R.id.fragmentContainer, fragment)
