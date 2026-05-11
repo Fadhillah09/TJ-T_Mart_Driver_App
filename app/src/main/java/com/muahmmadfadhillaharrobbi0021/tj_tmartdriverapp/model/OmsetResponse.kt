@@ -8,6 +8,7 @@ data class OmsetResponse(
 ) {
     data class OmsetData(
         val saldo: Double,
+        @SerializedName("saldo_hari_ini") val saldoHariIni: Double?,  // ← TAMBAH INI
         @SerializedName("pesanan_hari_ini") val pesananHariIni: Int?,
         @SerializedName("nama_bank") val namaBank: String?,
         @SerializedName("nomor_rekening") val nomorRekening: String?,

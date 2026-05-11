@@ -436,12 +436,14 @@ class BerandaFragment : Fragment() {
                         val data = response.body()!!.data!!
                         val nf = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
                         nf.maximumFractionDigits = 0
-                        currentSaldoFormatted = nf.format(data.saldo)
+
+                        // ← BERANDA pakai saldo hari ini saja (reset tiap hari)
+                        currentSaldoFormatted = nf.format(data.saldoHariIni ?: 0.0)
                         updateSaldoVisibility()
                         binding.tvNomorRek.text = data.nomorRekening ?: "-"
                         binding.tvTanggalGaji.text = data.tanggalGaji ?: "-"
 
-                        // ← Pakai dari API, bukan SharedPreferences
+                        // Pakai dari API, bukan SharedPreferences
                         val jumlah = data.pesananHariIni ?: 0
                         binding.tvPesananHariIni.text = "$jumlah pesanan"
                     }

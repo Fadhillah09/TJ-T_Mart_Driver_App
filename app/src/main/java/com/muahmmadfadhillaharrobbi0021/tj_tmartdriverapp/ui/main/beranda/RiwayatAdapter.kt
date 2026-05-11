@@ -35,7 +35,7 @@ class RiwayatAdapter(private val list: List<Pesanan>) :
             when (pesanan.statusAntar?.lowercase()) {
                 "selesai" -> {
                     tvStatus.text = "Selesai"
-                    tvStatus.setTextColor(context.getColor(android.R.color.holo_green_dark))
+                    tvStatus.setTextColor(android.graphics.Color.WHITE)
                     tvStatus.setBackgroundResource(R.drawable.bg_badge_selesai)
                 }
                 "dibatalkan" -> {
