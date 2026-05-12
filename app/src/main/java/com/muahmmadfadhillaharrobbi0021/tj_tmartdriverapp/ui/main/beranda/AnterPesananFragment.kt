@@ -46,9 +46,8 @@ class AnterPesananFragment : Fragment() {
     private var destLat: Double = 0.0
     private var destLng: Double = 0.0
 
-    // Timer
+    // Timer — hanya UI runnable, state ada di companion
     private val timerHandler = Handler(Looper.getMainLooper())
-    private var elapsedSeconds = 0L
     private var timerRunnable: Runnable? = null
 
     // State
@@ -68,6 +67,17 @@ class AnterPesananFragment : Fragment() {
     companion object {
         fun newInstance(id: Int) = AnterPesananFragment().apply {
             arguments = Bundle().apply { putInt("PESANAN_ID", id) }
+        }
+
+        // Timer global — tidak reset saat fragment recreate
+        private var globalStartTime = 0L
+        private var globalTimerRunning = false
+        private var globalElapsedSeconds = 0L
+
+        fun resetTimer() {
+            globalStartTime = 0L
+            globalTimerRunning = false
+            globalElapsedSeconds = 0L
         }
     }
 
@@ -101,12 +111,9 @@ class AnterPesananFragment : Fragment() {
 
     private fun setupTimeline() {
         with(binding) {
-            // Step 1 & 2 redup (sudah lewat)
             layoutStep1.alpha = 0.4f
             layoutStep2.alpha = 0.4f
-            // Step 3 aktif
             layoutStep3.alpha = 1f
-            // Step 4 masih redup
             layoutStep4.alpha = 0.4f
         }
     }
@@ -154,7 +161,6 @@ class AnterPesananFragment : Fragment() {
             tvTotalHarga.text       = nf.format(p.totalHarga ?: 0)
         }
 
-        // Koordinat tujuan
         val namaGedung = p.alamatDisplay?.split(",")?.firstOrNull()?.trim()
             ?: p.user?.alamatGedung ?: "Gedung 5"
         val raw = getCoords(namaGedung).split(",")
@@ -248,32 +254,23 @@ class AnterPesananFragment : Fragment() {
         Location.distanceBetween(driverLat, driverLng, destLat, destLng, results)
         val meter = results[0].toInt()
 
-        // Tampilkan label jarak
         val teks = if (meter >= 1000) String.format("Jarak: %.1f km", meter / 1000f)
         else "Jarak: $meter m"
         binding.tvJarak.text = teks
 
-        // ── AUTO-CHAT saat jarak ≤ 5 meter ────────────────────────────
         if (meter <= 5 && !autoChatSent) {
             autoChatSent = true
             kirimAutoChatHampirTiba()
-            // Tampilkan banner di atas peta
             binding.bannerDekat.visibility = View.VISIBLE
         }
     }
 
-    /**
-     * Mengirim pesan otomatis ke chat internal saat driver ≤ 5 meter dari tujuan.
-     * Pesan disimpan ke ChatRepository / database lokal sehingga pelanggan melihatnya di sisi mereka.
-     */
     private fun kirimAutoChatHampirTiba() {
-
-        // Untuk sementara, buka fragment chat dan sisipkan pesan otomatis
         val fragment = ChatPesananFragment.newInstance(
-            pesananId  = pesananId,
-            namaPembeli = pesanan?.user?.name ?: "Pelanggan",
+            pesananId    = pesananId,
+            namaPembeli  = pesanan?.user?.name ?: "Pelanggan",
             nomorPembeli = pesanan?.user?.noTelp ?: "",
-            autoPesan  = "Pesanan Anda sebentar lagi telah sampai! 🛵",
+            autoPesan    = "Pesanan Anda sebentar lagi telah sampai! 🛵",
             fotoPembeli  = pesanan?.user?.gambar
         )
         parentFragmentManager.beginTransaction()
@@ -285,12 +282,21 @@ class AnterPesananFragment : Fragment() {
     // ─── Timer ────────────────────────────────────────────────────────────────
 
     private fun startTimer() {
+        // Mulai timer baru hanya jika belum berjalan
+        if (!globalTimerRunning) {
+            globalStartTime = System.currentTimeMillis()
+            globalTimerRunning = true
+        }
+
         timerRunnable = object : Runnable {
             override fun run() {
-                elapsedSeconds++
-                val jam = elapsedSeconds / 3600
-                val mnt = (elapsedSeconds % 3600) / 60
-                val dtk = elapsedSeconds % 60
+                if (!globalTimerRunning) return
+                // Hitung dari startTime agar tetap akurat walau fragment recreate
+                globalElapsedSeconds = (System.currentTimeMillis() - globalStartTime) / 1000
+                val jam = globalElapsedSeconds / 3600
+                val mnt = (globalElapsedSeconds % 3600) / 60
+                val dtk = globalElapsedSeconds % 60
+                if (_binding == null) return
                 binding.tvTimer.text = if (jam > 0)
                     String.format("%02d:%02d:%02d", jam, mnt, dtk)
                 else
@@ -301,13 +307,6 @@ class AnterPesananFragment : Fragment() {
         timerHandler.post(timerRunnable!!)
     }
 
-
-    /**
-     * Hubungi pembeli via WhatsApp.
-     * - Jika WA terpasang dan nomor terdaftar → buka chat WA langsung.
-     * - Jika WA tidak terpasang → fallback ke Intent dial biasa.
-     * - Jika nomor kosong / tidak valid → tampilkan toast informatif.
-     */
     private fun hubungiViaWhatsApp() {
         val rawPhone = pesanan?.user?.noTelp
 
@@ -317,31 +316,18 @@ class AnterPesananFragment : Fragment() {
         }
 
         val normalized = normalizePhone(rawPhone)
-
-        // Cek apakah WhatsApp terpasang
         val pm = requireActivity().packageManager
         val waPackage = "com.whatsapp"
         val waBusinessPackage = "com.whatsapp.w4b"
 
-        val isWaInstalled = try {
-            pm.getPackageInfo(waPackage, 0)
-            true
-        } catch (e: PackageManager.NameNotFoundException) {
-            false
-        }
+        val isWaInstalled = try { pm.getPackageInfo(waPackage, 0); true }
+        catch (e: PackageManager.NameNotFoundException) { false }
 
-        val isWaBusinessInstalled = try {
-            pm.getPackageInfo(waBusinessPackage, 0)
-            true
-        } catch (e: PackageManager.NameNotFoundException) {
-            false
-        }
+        val isWaBusinessInstalled = try { pm.getPackageInfo(waBusinessPackage, 0); true }
+        catch (e: PackageManager.NameNotFoundException) { false }
 
         when {
             isWaInstalled || isWaBusinessInstalled -> {
-                // Buka WhatsApp langsung ke nomor pembeli
-                // Catatan: jika nomor tidak terdaftar di WA, WhatsApp sendiri yang menampilkan
-                // pesan "Nomor ini tidak terdaftar di WhatsApp"
                 try {
                     val uri = Uri.parse("https://wa.me/$normalized")
                     val intent = Intent(Intent.ACTION_VIEW, uri).apply {
@@ -349,28 +335,15 @@ class AnterPesananFragment : Fragment() {
                     }
                     startActivity(intent)
                 } catch (e: Exception) {
-                    // Fallback ke web WhatsApp
-                    val webIntent = Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse("https://wa.me/$normalized")
-                    )
-                    startActivity(webIntent)
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/$normalized")))
                 }
             }
-
             else -> {
-                // WhatsApp tidak terpasang → fallback ke dial biasa
-                Toast.makeText(
-                    requireContext(),
-                    "WhatsApp tidak ditemukan. Menghubungi via telepon...",
-                    Toast.LENGTH_SHORT
-                ).show()
-                val dialIntent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$rawPhone"))
-                startActivity(dialIntent)
+                Toast.makeText(requireContext(), "WhatsApp tidak ditemukan. Menghubungi via telepon...", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:$rawPhone")))
             }
         }
     }
-
 
     private fun normalizePhone(phone: String): String {
         val cleaned = phone.replace(Regex("[^0-9+]"), "")
@@ -405,16 +378,16 @@ class AnterPesananFragment : Fragment() {
     private fun konfirmasiTiba() {
         if (isSelesai) return
         isSelesai = true
+        globalTimerRunning = false  // ← stop timer global
         binding.btnPesananTiba.isEnabled = false
         binding.btnPesananTiba.text = "Memproses..."
         timerRunnable?.let { timerHandler.removeCallbacks(it) }
 
-        // Ambil jarak & durasi saat ini
         val jarakTeks = binding.tvJarak.text.toString()
             .replace("Jarak: ", "").trim()
-        val jam = elapsedSeconds / 3600
-        val mnt = (elapsedSeconds % 3600) / 60
-        val dtk = elapsedSeconds % 60
+        val jam = globalElapsedSeconds / 3600
+        val mnt = (globalElapsedSeconds % 3600) / 60
+        val dtk = globalElapsedSeconds % 60
         val durasiTeks = if (jam > 0)
             String.format("%02d jam %02d menit %02d detik", jam, mnt, dtk)
         else if (mnt > 0)
@@ -437,11 +410,8 @@ class AnterPesananFragment : Fragment() {
                 if (_binding == null) return
                 if (response.isSuccessful) {
                     markTiba()
-
-                    // ← TAMBAH INI: increment counter pesanan harian (sama seperti selesaikanPesanan di Beranda)
                     session.tambahPesananHariIni()
-
-                    // Navigasi ke full-screen animasi PesananTibaFragment
+                    resetTimer()  // ← reset setelah pesanan selesai
                     val tibaFragment = PesananTibaFragment.newInstance(
                         namaPembeli = pesanan?.user?.name ?: "Pelanggan",
                         totalHarga  = pesanan?.totalHarga ?: 0
@@ -449,9 +419,9 @@ class AnterPesananFragment : Fragment() {
                     parentFragmentManager.beginTransaction()
                         .replace(R.id.fragmentContainer, tibaFragment)
                         .commit()
-                }
-                else {
+                } else {
                     isSelesai = false
+                    globalTimerRunning = true
                     binding.btnPesananTiba.isEnabled = true
                     binding.btnPesananTiba.text = "✓ Pesanan Tiba"
                     Toast.makeText(requireContext(), "Gagal update status", Toast.LENGTH_SHORT).show()
@@ -461,13 +431,13 @@ class AnterPesananFragment : Fragment() {
             override fun onFailure(call: Call<UpdateStatusResponse>, t: Throwable) {
                 if (_binding == null) return
                 isSelesai = false
+                globalTimerRunning = true
                 binding.btnPesananTiba.isEnabled = true
                 binding.btnPesananTiba.text = "✓ Pesanan Tiba"
                 Toast.makeText(requireContext(), "Error: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
-
 
     private fun getCoords(gedungName: String): String = when {
         gedungName.contains("Gedung 1",  true) -> "-6.9710403,107.6283141"
@@ -491,10 +461,10 @@ class AnterPesananFragment : Fragment() {
         else                                    -> "-6.9706729,107.627767"
     }
 
-
     override fun onDestroyView() {
         super.onDestroyView()
         timerRunnable?.let { timerHandler.removeCallbacks(it) }
+        // globalTimerRunning JANGAN diubah di sini agar timer tetap jalan di background
         if (::locationCallback.isInitialized)
             fusedLocationClient.removeLocationUpdates(locationCallback)
         _binding = null

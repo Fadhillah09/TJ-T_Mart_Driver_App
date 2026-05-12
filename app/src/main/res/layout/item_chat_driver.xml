@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Bubble chat DRIVER (kanan, merah) -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -11,62 +10,64 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:layout_gravity="end"
-        android:maxWidth="260dp">
+        android:orientation="vertical">
 
         <!-- Bubble teks -->
         <TextView
             android:id="@+id/tvIsiPesan"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Pesan"
-            android:textSize="14sp"
-            android:textColor="#FFFFFF"
+            android:minWidth="60dp"
+            android:maxWidth="260dp"
+            android:background="@drawable/bg_bubble_driver"
+            android:gravity="start"
             android:paddingHorizontal="14dp"
             android:paddingVertical="10dp"
-            android:background="@drawable/bg_bubble_driver"
+            android:text="Pesan"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif"
             android:visibility="visible" />
 
-        <!-- Bubble media (gambar/video) -->
         <FrameLayout
+            android:id="@+id/frameMedia"
             android:layout_width="200dp"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:visibility="gone">
 
             <ImageView
                 android:id="@+id/ivMediaPesan"
                 android:layout_width="match_parent"
                 android:layout_height="160dp"
-                android:scaleType="centerCrop"
                 android:background="@drawable/bg_bubble_driver"
+                android:scaleType="centerCrop"
                 android:visibility="gone" />
 
-            <!-- Badge VIDEO -->
             <TextView
                 android:id="@+id/tvBadgeVideo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:background="#99000000"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="4dp"
                 android:text="▶ Video"
                 android:textColor="#FFFFFF"
                 android:textSize="13sp"
                 android:textStyle="bold"
-                android:background="#99000000"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="4dp"
                 android:visibility="gone" />
         </FrameLayout>
 
-        <!-- Waktu -->
         <TextView
             android:id="@+id/tvWaktuPesan"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
-            android:text="00:00"
-            android:textSize="10sp"
-            android:textColor="#9E9E9E"
             android:layout_marginTop="2dp"
-            android:layout_marginEnd="2dp" />
+            android:layout_marginEnd="2dp"
+            android:text="00:00"
+            android:textColor="#9E9E9E"
+            android:textSize="10sp" />
     </LinearLayout>
 </LinearLayout>

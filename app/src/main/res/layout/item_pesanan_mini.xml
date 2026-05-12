@@ -25,7 +25,7 @@
         android:layout_height="wrap_content"
         android:text="Rp12.000"
         android:textSize="12sp"
-        android:textColor="@color/primary_red"
+        android:textColor="@color/green"
         android:textStyle="bold"
         android:layout_marginStart="8dp" />
 

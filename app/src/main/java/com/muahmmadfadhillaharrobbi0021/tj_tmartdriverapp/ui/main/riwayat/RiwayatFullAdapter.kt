@@ -218,7 +218,6 @@ class RiwayatFullAdapter(
                     renderItems(isExpanded)
                 }
 
-                // FIX: Jarak & Durasi — pakai field root Pesanan, bukan user.lokasi
                 b.tvJarak.text = pesanan.jarak ?: "- m"
                 b.tvDurasi.text = pesanan.durasi ?: "- menit"
 

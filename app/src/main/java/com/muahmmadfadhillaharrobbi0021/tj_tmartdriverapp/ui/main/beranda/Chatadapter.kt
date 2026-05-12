@@ -40,12 +40,14 @@ class ChatAdapter(
         private val tvWaktu: TextView?    = itemView.findViewById(R.id.tvWaktuPesan)
         private val ivMedia: ImageView?   = itemView.findViewById(R.id.ivMediaPesan)
         private val badgeVideo: TextView? = itemView.findViewById(R.id.tvBadgeVideo)
+        private val frameMedia: View?     = itemView.findViewById(R.id.frameMedia)
 
         fun bind(msg: ChatMessage) {
             // Reset semua dulu agar tidak ada tampilan ganda
             tvIsi?.visibility      = View.GONE
             ivMedia?.visibility    = View.GONE
             badgeVideo?.visibility = View.GONE
+            frameMedia?.visibility  = View.GONE
 
             when (msg.tipe) {
                 TipePesan.TEKS -> {
@@ -54,6 +56,7 @@ class ChatAdapter(
                 }
 
                 TipePesan.GAMBAR -> {
+                    frameMedia?.visibility = View.VISIBLE
                     ivMedia?.visibility = View.VISIBLE
                     try {
                         ivMedia?.setImageURI(Uri.parse(msg.isi))
@@ -63,6 +66,7 @@ class ChatAdapter(
                 }
 
                 TipePesan.VIDEO -> {
+                    frameMedia?.visibility = View.VISIBLE
                     ivMedia?.visibility    = View.VISIBLE
                     badgeVideo?.visibility = View.VISIBLE
                     ivMedia?.setImageResource(R.drawable.ic_videocam)
