@@ -14,6 +14,7 @@ import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.utils.Constants
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
+import java.util.TimeZone
 
 // Sealed class untuk dua tipe item di RecyclerView: header tanggal & card pesanan
 sealed class RiwayatItem {
@@ -37,7 +38,7 @@ class RiwayatFullAdapter(
     private fun buildItems(pesananList: List<Pesanan>): List<RiwayatItem> {
         val result = mutableListOf<RiwayatItem>()
         val grouped = pesananList.groupBy {
-            formatTanggal(it.createdAt ?: it.updatedAt)  // ← fallback ke updatedAt
+            formatTanggal(it.createdAt ?: it.updatedAt)
         }
         for ((tanggal, items) in grouped) {
             result.add(RiwayatItem.Header(tanggal))
@@ -50,17 +51,23 @@ class RiwayatFullAdapter(
         if (raw == null) return "Tanggal tidak diketahui"
         return try {
             val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'", Locale.getDefault())
+            sdf.timeZone = TimeZone.getTimeZone("UTC")
             sdf.isLenient = true
             val date = sdf.parse(raw) ?: return raw
-            SimpleDateFormat("d MMMM yyyy", Locale("id", "ID")).format(date)
+            val outSdf = SimpleDateFormat("d MMMM yyyy", Locale("id", "ID"))
+            outSdf.timeZone = TimeZone.getTimeZone("Asia/Jakarta")
+            outSdf.format(date)
         } catch (e: Exception) {
             try {
                 val sdf2 = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+                sdf2.timeZone = TimeZone.getTimeZone("UTC")
                 sdf2.isLenient = true
                 val date = sdf2.parse(raw) ?: return raw
-                SimpleDateFormat("d MMMM yyyy", Locale("id", "ID")).format(date)
+                val outSdf2 = SimpleDateFormat("d MMMM yyyy", Locale("id", "ID"))
+                outSdf2.timeZone = TimeZone.getTimeZone("Asia/Jakarta")
+                outSdf2.format(date)
             } catch (e2: Exception) {
-                raw.take(10) // fallback tampilkan yyyy-MM-dd
+                raw.take(10)
             }
         }
     }
@@ -69,15 +76,21 @@ class RiwayatFullAdapter(
         if (raw == null) return ""
         return try {
             val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'", Locale.getDefault())
+            sdf.timeZone = TimeZone.getTimeZone("UTC")
             sdf.isLenient = true
             val date = sdf.parse(raw) ?: return ""
-            SimpleDateFormat("HH.mm 'WIB'", Locale.getDefault()).format(date)
+            val outSdf = SimpleDateFormat("HH.mm 'WIB'", Locale.getDefault())
+            outSdf.timeZone = TimeZone.getTimeZone("Asia/Jakarta")
+            outSdf.format(date)
         } catch (e: Exception) {
             try {
                 val sdf2 = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+                sdf2.timeZone = TimeZone.getTimeZone("UTC")
                 sdf2.isLenient = true
                 val date = sdf2.parse(raw) ?: return ""
-                SimpleDateFormat("HH.mm 'WIB'", Locale.getDefault()).format(date)
+                val outSdf2 = SimpleDateFormat("HH.mm 'WIB'", Locale.getDefault())
+                outSdf2.timeZone = TimeZone.getTimeZone("Asia/Jakarta")
+                outSdf2.format(date)
             } catch (e2: Exception) { "" }
         }
     }
@@ -124,13 +137,14 @@ class RiwayatFullAdapter(
                 nf.maximumFractionDigits = 0
 
                 // Rute
-                b.tvOrigin.text = pesanan.user?.lokasi?.namaMart ?: pesanan.namaMart ?: "TJ Mart Putri"
+                b.tvOrigin.text = pesanan.namaMart ?: pesanan.user?.lokasi?.namaMart ?: "TJ Mart Putri"
                 b.tvDestination.text = pesanan.alamatDisplay ?: pesanan.user?.getNamaLokasiLengkap() ?: "-"
                 b.tvWaktu.text = formatJam(pesanan.createdAt ?: pesanan.updatedAt)
 
                 // Nama pelanggan & jumlah item
                 b.tvNamaPelanggan.text = pesanan.user?.name ?: "Pelanggan"
-                val jumlahItem = pesanan.details?.sumOf { it.qty ?: it.jumlah ?: 0 } ?: 0
+                // FIX: jumlah pakai jumlah ?: qty (backend riwayat hanya kirim jumlah, bukan qty)
+                val jumlahItem = pesanan.details?.sumOf { it.jumlah ?: it.qty ?: 0 } ?: 0
                 b.tvJumlahPesanan.text = "Total : $jumlahItem Pesanan"
 
                 // Load foto pelanggan
@@ -204,12 +218,18 @@ class RiwayatFullAdapter(
                     renderItems(isExpanded)
                 }
 
-                // Footer: Jarak, Durasi, Ongkir (statis karena tidak ada di model)
-                b.tvJarak.text = pesanan.user?.lokasi?.jarak ?: pesanan.jarak ?: "- m"
-                b.tvDurasi.text = pesanan.user?.lokasi?.durasi ?: pesanan.durasi ?: "- menit"
+                // FIX: Jarak & Durasi — pakai field root Pesanan, bukan user.lokasi
+                b.tvJarak.text = pesanan.jarak ?: "- m"
+                b.tvDurasi.text = pesanan.durasi ?: "- menit"
+
+                b.tvOngkir.text = nf.format(pesanan.ongkir ?: 0)
+                b.tvBiayaLayanan.text = nf.format(pesanan.biayaLayanan ?: 0)
+
+                // Total
                 b.tvTotal.text = nf.format(pesanan.totalHarga)
             }
         }
     }
+
     override fun getItemCount(): Int = items.size
 }

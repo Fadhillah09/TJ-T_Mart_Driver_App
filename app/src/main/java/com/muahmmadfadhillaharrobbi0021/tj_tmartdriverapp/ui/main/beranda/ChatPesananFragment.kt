@@ -188,15 +188,14 @@ class ChatPesananFragment : Fragment() {
 
     private fun setupInputListeners() {
 
-        // ── PERUBAHAN 1: Hide kamera & VN saat mengetik, tampil kembali saat kosong ──
         binding.etPesan.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
                 val sedangMenulis = !s.isNullOrEmpty()
                 val visibility = if (sedangMenulis) View.GONE else View.VISIBLE
-                binding.btnKamera.visibility = visibility   // tombol kamera gabung
-                binding.btnVoiceNote.visibility = visibility   // tombol voice note
+                binding.btnKamera.visibility = visibility
+                binding.btnVoiceNote.visibility = visibility
             }
         })
 
@@ -216,8 +215,6 @@ class ChatPesananFragment : Fragment() {
         binding.btnBatalMedia.setOnClickListener { resetMediaPreview() }
     }
 
-    // ─── Popup pilih Foto atau Video ──────────────────────────────────────────
-
     private fun tampilkanPopupKamera() {
         val opsi = arrayOf("📷 Foto", "🎥 Video")
         android.app.AlertDialog.Builder(requireContext())
@@ -229,8 +226,6 @@ class ChatPesananFragment : Fragment() {
                 }
             }.show()
     }
-
-    // ─── Kirim Pesan ──────────────────────────────────────────────────────────
 
     private fun kirimTeks() {
         val teks = binding.etPesan.text?.toString()?.trim()
@@ -265,8 +260,6 @@ class ChatPesananFragment : Fragment() {
             binding.rvChat.scrollToPosition(pesanList.lastIndex)
         }
     }
-
-    // ─── Media ────────────────────────────────────────────────────────────────
 
     private fun pilihSumberFoto() {
         val opsi = arrayOf("📷 Ambil Foto", "🖼️ Pilih dari Galeri")
@@ -316,8 +309,6 @@ class ChatPesananFragment : Fragment() {
         binding.layoutMediaPreview.visibility = View.GONE
         binding.ivMediaPreview.setImageDrawable(null)
     }
-
-    // ─── VoIP ─────────────────────────────────────────────────────────────────
 
     private fun mulaiPanggilan() {
         if (nomorPembeli.isBlank()) {

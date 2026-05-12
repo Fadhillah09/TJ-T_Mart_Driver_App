@@ -15,4 +15,5 @@
     <color name="bg_gray">#F8F9FA</color> <color name="text_black">#1A1A1A</color>
     <color name="text_gray">#757575</color>
     <color name="red">#DC2626</color>
+    <color name="green">#5DAA64</color>
 </resources>

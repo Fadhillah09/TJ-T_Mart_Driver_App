@@ -19,7 +19,9 @@ data class Pesanan(
     @SerializedName("pembayaran_display") val pembayaranDisplay: String?,
     @SerializedName("nama_mart") val namaMart: String?,
     @SerializedName("jarak") val jarak: String?,
-    @SerializedName("durasi") val durasi: String?
+    @SerializedName("durasi") val durasi: String?,
+    @SerializedName("ongkir") val ongkir: Int?,
+    @SerializedName("biaya_layanan") val biayaLayanan: Int?
 ) {
     data class ItemPesanan(
         @SerializedName("nama_produk") val namaProduk: String?,
