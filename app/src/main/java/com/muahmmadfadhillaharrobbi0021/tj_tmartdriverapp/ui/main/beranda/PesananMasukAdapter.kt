@@ -61,7 +61,10 @@ class PesananMasukAdapter(
         val nf = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
         nf.maximumFractionDigits = 0
 
-        holder.tvId.text = "${pesanan.id}"
+        holder.tvId.text = pesanan.namaMart
+            ?: pesanan.user?.lokasi?.namaMart
+                    ?: pesanan.user?.lokasi?.namaLokasi
+                    ?: "-"
         holder.tvNama.text = pesanan.user?.name ?: "Pelanggan"
         holder.tvAlamat.text = pesanan.alamatDisplay ?: pesanan.user?.getNamaLokasiLengkap() ?: "-"
         holder.tvHarga.text = nf.format(pesanan.totalHarga)

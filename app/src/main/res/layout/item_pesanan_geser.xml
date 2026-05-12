@@ -19,25 +19,17 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <TextView
-            android:id="@+id/tvIdPesanan"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:text="#30"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:textColor="#000000" />
-
+        <!-- 1. Nama Pembeli (paling atas, bold) -->
         <TextView
             android:id="@+id/tvNamaPembeli"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Nama Pelanggan"
-            android:layout_marginTop="4dp"
             android:textStyle="bold"
-            android:textColor="#333333"
-            android:textSize="14sp" />
+            android:textColor="#000000"
+            android:textSize="16sp" />
 
+        <!-- 2. Alamat Gedung & Kamar -->
         <TextView
             android:id="@+id/tvAlamat"
             android:layout_width="match_parent"
@@ -45,9 +37,21 @@
             android:text="Alamat"
             android:textColor="#757575"
             android:textSize="13sp"
+            android:layout_marginTop="2dp"
             android:maxLines="2"
             android:ellipsize="end" />
 
+        <!-- 3. Nama Mart (tidak bold, di bawah alamat) -->
+        <TextView
+            android:id="@+id/tvIdPesanan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="TJ Mart Putra"
+            android:textSize="13sp"
+            android:textColor="#757575"
+            android:layout_marginTop="2dp" />
+
+        <!-- 4. Harga -->
         <TextView
             android:id="@+id/tvTotalHarga"
             android:layout_width="wrap_content"
@@ -58,6 +62,7 @@
             android:textSize="15sp"
             android:layout_marginTop="6dp" />
 
+        <!-- 5. Metode Pembayaran -->
         <TextView
             android:id="@+id/tvMetodePembayaran"
             android:layout_width="wrap_content"
@@ -68,6 +73,7 @@
             android:textSize="12sp"
             android:textStyle="italic" />
 
+        <!-- 6. Status -->
         <TextView
             android:id="@+id/tvStatus"
             android:layout_width="wrap_content"
@@ -114,7 +120,7 @@
                 android:paddingBottom="8dp"
                 android:text="TERIMA"
                 android:textSize="12sp"
-                android:backgroundTint="#E53935" />
+                android:backgroundTint="#A8000E" />
 
         </LinearLayout>
     </LinearLayout>

@@ -1,5 +1,6 @@
 package com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main.omset
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -60,5 +61,6 @@ class RiwayatOmsetAdapter(private val list: List<Pesanan>) :
         val nf = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
         nf.maximumFractionDigits = 0
         b.tvNominal.text = "+${nf.format(3000)}"
+        b.tvNominal.setTextColor(Color.parseColor("#5DAA64"))
     }
 }

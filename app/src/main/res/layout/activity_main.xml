@@ -22,38 +22,14 @@
         app:menu="@menu/bottom_nav_menu"
         app:elevation="8dp" />
 
-    <!-- Ring sonar 1 (luar) -->
-    <View
-        android:id="@+id/ringOuter"
-        android:layout_width="54dp"
-        android:layout_height="54dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="22dp"
-        android:background="@drawable/bg_ring_pulse"
-        android:alpha="0"
-        android:elevation="10dp" />
-
-    <!-- Ring sonar 2 (dalam) -->
-    <View
-        android:id="@+id/ringInner"
-        android:layout_width="54dp"
-        android:layout_height="54dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="22dp"
-        android:background="@drawable/bg_ring_pulse"
-        android:alpha="0"
-        android:elevation="10dp" />
-
-    <!-- Tombol Absensi menonjol di tengah -->
+    <!-- Tombol Absensi (diperkecil, tanpa animasi gelombang) -->
     <LinearLayout
         android:id="@+id/btnAbsensi"
-        android:layout_width="54dp"
-        android:layout_height="54dp"
+        android:layout_width="46dp"
+        android:layout_height="46dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="22dp"
+        android:layout_marginBottom="10dp"
         android:orientation="vertical"
         android:gravity="center"
         android:background="@drawable/bg_absensi_button"
@@ -62,8 +38,8 @@
         android:elevation="12dp">
 
         <ImageView
-            android:layout_width="22dp"
-            android:layout_height="22dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:src="@drawable/ic_nav_absensi"
             android:tint="#FFFFFF" />
 

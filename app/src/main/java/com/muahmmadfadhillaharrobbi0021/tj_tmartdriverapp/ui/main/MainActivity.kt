@@ -1,14 +1,11 @@
 package com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main
 
 import android.Manifest
-import android.animation.AnimatorSet
-import android.animation.ObjectAnimator
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
 import android.provider.MediaStore
-import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -71,7 +68,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         loadFragment(BerandaFragment())
-        startAbsensiPulseAnimation()
         startGlobalPoller()
 
         binding.bottomNavigation.setOnItemSelectedListener { item ->
@@ -188,32 +184,6 @@ class MainActivity : AppCompatActivity() {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) checkLocationAndTimeAfterScan()
             }
         }
-    }
-
-    private fun startAbsensiPulseAnimation() {
-        fun animateRing(view: android.view.View, startDelay: Long) {
-            val scaleX = ObjectAnimator.ofFloat(view, "scaleX", 1f, 1.6f).apply {
-                duration = 1800
-                repeatCount = ObjectAnimator.INFINITE
-                interpolator = AccelerateDecelerateInterpolator()
-                this.startDelay = startDelay
-            }
-            val scaleY = ObjectAnimator.ofFloat(view, "scaleY", 1f, 1.6f).apply {
-                duration = 1800
-                repeatCount = ObjectAnimator.INFINITE
-                interpolator = AccelerateDecelerateInterpolator()
-                this.startDelay = startDelay
-            }
-            val alpha = ObjectAnimator.ofFloat(view, "alpha", 0.6f, 0f).apply {
-                duration = 1800
-                repeatCount = ObjectAnimator.INFINITE
-                interpolator = AccelerateDecelerateInterpolator()
-                this.startDelay = startDelay
-            }
-            AnimatorSet().apply { playTogether(scaleX, scaleY, alpha); start() }
-        }
-        animateRing(binding.ringOuter, 0L)
-        animateRing(binding.ringInner, 900L)
     }
 
     private fun kirimDataAbsensi(lat: Double, lng: Double, tipe: String) {
