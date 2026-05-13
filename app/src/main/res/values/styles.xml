@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="ChipKebijakanStyle" parent="Widget.MaterialComponents.Chip.Entry">
+        <item name="android:textColor">#B71C1C</item>
+        <item name="chipBackgroundColor">#FFFFFF</item>
+        <item name="chipStrokeColor">#B71C1C</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="chipCornerRadius">20dp</item>
+        <item name="chipIconVisible">false</item>
+        <item name="closeIconVisible">false</item>
+        <item name="checkedIconVisible">false</item>
+    </style>
+
+</resources>
