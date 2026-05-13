@@ -172,7 +172,7 @@ class RiwayatFullAdapter(
                     "dibatalkan" -> {
                         b.tvStatusBadge.text = "Dibatalkan"
                         b.tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_dibatalkan)
-                        b.tvStatusBadge.setTextColor(context.getColor(R.color.white))
+                        b.tvStatusBadge.setTextColor(context.getColor(R.color.telkom_red))
                         b.btnSelesaikan.visibility = View.GONE
                     }
                     "sedang diantar" -> {

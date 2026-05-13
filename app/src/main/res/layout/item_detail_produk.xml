@@ -59,7 +59,7 @@
         android:layout_gravity="center_vertical"
         android:layout_marginStart="8dp"
         android:text="Rp0"
-        android:textColor="@color/red"
+        android:textColor="@color/green"
         android:textStyle="bold"
         android:textSize="13sp" />
 

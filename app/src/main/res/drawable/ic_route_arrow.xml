@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="80dp"
+    android:height="24dp"
+    android:viewportWidth="80"
+    android:viewportHeight="24">
+
+    <!-- Titik 1 -->
+    <path
+        android:pathData="M2,12 L12,12"
+        android:strokeColor="#DC2626"
+        android:strokeWidth="3"
+        android:strokeLineCap="round" />
+
+    <!-- Titik 2 -->
+    <path
+        android:pathData="M18,12 L28,12"
+        android:strokeColor="#DC2626"
+        android:strokeWidth="3"
+        android:strokeLineCap="round" />
+
+    <!-- Titik 3 -->
+    <path
+        android:pathData="M34,12 L44,12"
+        android:strokeColor="#DC2626"
+        android:strokeWidth="3"
+        android:strokeLineCap="round" />
+
+    <!-- Titik 4 -->
+    <path
+        android:pathData="M50,12 L58,12"
+        android:strokeColor="#DC2626"
+        android:strokeWidth="3"
+        android:strokeLineCap="round" />
+
+    <!-- Kepala panah -->
+    <path
+        android:pathData="M58,5 L74,12 L58,19 Z"
+        android:fillColor="#DC2626" />
+
+</vector>

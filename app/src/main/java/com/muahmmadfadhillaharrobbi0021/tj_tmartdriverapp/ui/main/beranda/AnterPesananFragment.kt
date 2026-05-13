@@ -389,11 +389,9 @@ class AnterPesananFragment : Fragment() {
         val mnt = (globalElapsedSeconds % 3600) / 60
         val dtk = globalElapsedSeconds % 60
         val durasiTeks = if (jam > 0)
-            String.format("%02d jam %02d menit %02d detik", jam, mnt, dtk)
-        else if (mnt > 0)
-            String.format("%02d menit %02d detik", mnt, dtk)
+            String.format("%d,%02d jam", jam, mnt)
         else
-            String.format("%02d detik", dtk)
+            String.format("%d,%02d menit", mnt, dtk)
 
         ApiClient.instance.updateStatusAntar(
             session.getBearerToken(),

@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.R
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.api.ApiClient
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.databinding.FragmentRiwayatBinding
@@ -44,9 +45,9 @@ class RiwayatFragment : Fragment() {
         binding.swipeRefresh.setOnRefreshListener { loadRiwayatData() }
 
         binding.btnBack.setOnClickListener {
-            parentFragmentManager.popBackStack()
+            requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigation)
+                ?.selectedItemId = R.id.nav_beranda
         }
-
         setupTabs()
         setupSearch()
         loadRiwayatData()

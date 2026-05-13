@@ -52,7 +52,6 @@ class DetailPesananFragment : Fragment() {
 
         binding.ivBack.setOnClickListener { parentFragmentManager.popBackStack() }
 
-        // Load data detail dari API
         fetchDetailPesanan()
 
         binding.btnDiantar.setOnClickListener {
@@ -71,7 +70,6 @@ class DetailPesananFragment : Fragment() {
                     if (_binding == null) return
                     if (response.isSuccessful) {
                         val allData = response.body()?.data ?: emptyList()
-                        // Cari pesanan yang spesifik berdasarkan ID
                         val detail = allData.find { it.id == pesananId }
                         detail?.let { setupUI(it) }
                     }
@@ -106,12 +104,11 @@ class DetailPesananFragment : Fragment() {
                 ?: pesanan.user?.getNamaLokasiLengkap()
                 ?: "Alamat tidak tersedia"
 
-            tvAlamatGedung.text = alamatFix
             tvMetodePembayaran.text = "Metode: ${pesanan.metodePembayaran ?: "Cash"}"
 
             val totalHarga = pesanan.totalHarga ?: 0
-            val ongkir = if (pesanan.tipeLayanan == "delivery") 3000 else 0
-            val layanan = 2000
+            val ongkir = if (pesanan.tipeLayanan == "delivery" || pesanan.tipeLayanan == "galon") 3000 else 0
+            val layanan = if (pesanan.tipeLayanan == "delivery" || pesanan.tipeLayanan == "galon") 2000 else 0
             val subtotal = totalHarga - ongkir - layanan
 
             tvSubtotal.text = nf.format(subtotal)
@@ -119,7 +116,15 @@ class DetailPesananFragment : Fragment() {
             tvBiayaLayanan.text = nf.format(layanan)
             tvTotalHarga.text = nf.format(totalHarga)
 
-            val namaGedung = alamatFix.split(",").firstOrNull()?.trim() ?: "Gedung 5"
+            // ↓ Banner rute: nama mart & tujuan
+            val namaMart = pesanan.namaMart ?: "TJ Mart Putra"
+            val namaGedung = alamatFix.split(",").firstOrNull()?.trim() ?: alamatFix
+            tvNamaMartDetail.text = namaMart
+            tvTujuanDetail.text = namaGedung
+
+            // ↓ Animasi kedip berulang pada panah rute
+            startRouteAnimation()
+
             setupWebView(namaGedung)
 
             pesanan.details?.let { items ->
@@ -133,7 +138,27 @@ class DetailPesananFragment : Fragment() {
         }
     }
 
-    // Pisahkan fungsi WebView agar kode lebih rapi
+    private fun startRouteAnimation() {
+        if (_binding == null) return
+        val arrow = binding.ivAnimasiRute
+
+        // Animasi translasi kiri-kanan berulang untuk efek "bergerak"
+        arrow.animate()
+            .translationX(8f)
+            .setDuration(500)
+            .withEndAction {
+                if (_binding == null) return@withEndAction
+                arrow.animate()
+                    .translationX(-8f)
+                    .setDuration(500)
+                    .withEndAction {
+                        if (_binding != null) startRouteAnimation()
+                    }
+                    .start()
+            }
+            .start()
+    }
+
     private fun setupWebView(namaGedung: String) {
         val coords = getCoords(namaGedung)
         val (lat, lng) = coords.split(",")
@@ -146,7 +171,7 @@ class DetailPesananFragment : Fragment() {
             </iframe>
         </body>
         </html>
-    """.trimIndent()
+        """.trimIndent()
 
         binding.webViewMap.settings.apply {
             javaScriptEnabled = true
@@ -154,70 +179,36 @@ class DetailPesananFragment : Fragment() {
             loadWithOverviewMode = true
             useWideViewPort = true
         }
-        binding.webViewMap.loadDataWithBaseURL("https://www.google.com", html, "text/html", "UTF-8", null)
+        binding.webViewMap.loadDataWithBaseURL(
+            "https://www.google.com", html, "text/html", "UTF-8", null
+        )
     }
 
-    private fun openGoogleMaps(gedungName: String) {
-        val coords = when (gedungName) {
-            "Gedung 1" -> "-6.9710403,107.6283141"
-            "Gedung 2" -> "-6.9707509,107.6283404"
-            "Gedung 3" -> "-6.9704344,107.6283533"
-            "Gedung 4" -> "-6.9709904,107.6277174"
-            "Gedung 5" -> "-6.9706729,107.627767"
-            "Gedung 6" -> "-6.970935,107.6271111"
-            "Gedung 7" -> "-6.9706223,107.6271815"
-            "Gedung 8" -> "-6.9702831,107.6272323"
-            "Gedung 9" -> "-6.9700347,107.6277742"
-            "Gedung 10" -> "-6.9697409,107.6278167"
-            "Gedung 11" -> "-6.9700978,107.6283584"
-            "Gedung 12" -> "-6.9697555,107.6283976"
-            "Gedung A" -> "-6.9740468,107.6285963"
-            "Gedung B" -> "-6.9736757,107.6286558"
-            "Gedung C" -> "-6.9732535,107.6287044"
-            "Gedung D" -> "-6.9728527,107.6286204"
-            "Gedung E" -> "-6.9725544,107.6286242"
-            "Gedung F" -> "-6.9720839,107.6286579"
-            else -> "-6.9706729,107.627767"
-        }
-
-        val gmmIntentUri = Uri.parse("google.navigation:q=$coords")
-        val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
-        mapIntent.setPackage("com.google.android.apps.maps")
-
-        if (mapIntent.resolveActivity(requireActivity().packageManager) != null) {
-            startActivity(mapIntent)
-        } else {
-            // Jika tidak ada app Maps, buka browser
-            val webUri = Uri.parse("https://www.google.com/maps/dir/?api=1&destination=$coords")
-            startActivity(Intent(Intent.ACTION_VIEW, webUri))
-        }
-    }
-    private fun getCoords(gedungName: String): String {
-        return when (gedungName) {
-            "Gedung 1" -> "-6.9710403,107.6283141"
-            "Gedung 2" -> "-6.9707509,107.6283404"
-            "Gedung 3" -> "-6.9704344,107.6283533"
-            "Gedung 4" -> "-6.9709904,107.6277174"
-            "Gedung 5" -> "-6.9706729,107.627767"
-            "Gedung 6" -> "-6.970935,107.6271111"
-            "Gedung 7" -> "-6.9706223,107.6271815"
-            "Gedung 8" -> "-6.9702831,107.6272323"
-            "Gedung 9" -> "-6.9700347,107.6277742"
-            "Gedung 10" -> "-6.9697409,107.6278167"
-            "Gedung 11" -> "-6.9700978,107.6283584"
-            "Gedung 12" -> "-6.9697555,107.6283976"
-            "Gedung A" -> "-6.9740468,107.6285963"
-            "Gedung B" -> "-6.9736757,107.6286558"
-            "Gedung C" -> "-6.9732535,107.6287044"
-            "Gedung D" -> "-6.9728527,107.6286204"
-            "Gedung E" -> "-6.9725544,107.6286242"
-            "Gedung F" -> "-6.9720839,107.6286579"
-            else -> "-6.9706729,107.627767"
-        }
+    private fun getCoords(gedungName: String): String = when {
+        gedungName.contains("Gedung 1",  true) -> "-6.9710403,107.6283141"
+        gedungName.contains("Gedung 2",  true) -> "-6.9707509,107.6283404"
+        gedungName.contains("Gedung 3",  true) -> "-6.9704344,107.6283533"
+        gedungName.contains("Gedung 4",  true) -> "-6.9709904,107.6277174"
+        gedungName.contains("Gedung 5",  true) -> "-6.9706729,107.627767"
+        gedungName.contains("Gedung 6",  true) -> "-6.970935,107.6271111"
+        gedungName.contains("Gedung 7",  true) -> "-6.9706223,107.6271815"
+        gedungName.contains("Gedung 8",  true) -> "-6.9702831,107.6272323"
+        gedungName.contains("Gedung 9",  true) -> "-6.9700347,107.6277742"
+        gedungName.contains("Gedung 10", true) -> "-6.9697409,107.6278167"
+        gedungName.contains("Gedung 11", true) -> "-6.9700978,107.6283584"
+        gedungName.contains("Gedung 12", true) -> "-6.9697555,107.6283976"
+        gedungName.contains("Gedung A",  true) -> "-6.9740468,107.6285963"
+        gedungName.contains("Gedung B",  true) -> "-6.9736757,107.6286558"
+        gedungName.contains("Gedung C",  true) -> "-6.9732535,107.6287044"
+        gedungName.contains("Gedung D",  true) -> "-6.9728527,107.6286204"
+        gedungName.contains("Gedung E",  true) -> "-6.9725544,107.6286242"
+        gedungName.contains("Gedung F",  true) -> "-6.9720839,107.6286579"
+        else                                    -> "-6.9706729,107.627767"
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        binding.ivAnimasiRute.animate().cancel()
         _binding = null
     }
 }
