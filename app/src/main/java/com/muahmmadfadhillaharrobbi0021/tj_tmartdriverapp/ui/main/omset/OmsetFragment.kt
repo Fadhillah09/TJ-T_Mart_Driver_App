@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.github.mikephil.charting.components.XAxis
@@ -19,6 +20,7 @@ import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.GrafikResponse
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.OmsetResponse
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.Pesanan
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.PesananResponse
+import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.RewardResponse
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.utils.SessionManager
 import retrofit2.Call
 import retrofit2.Callback
@@ -94,6 +96,11 @@ class OmsetFragment : Fragment() {
             updateRiwayatList()
         }
 
+        // tombol klaim reward
+        binding.btnKlaimReward.setOnClickListener {
+            klaimReward()
+        }
+
         loadAllData()
     }
 
@@ -101,6 +108,7 @@ class OmsetFragment : Fragment() {
         loadOmset()
         loadRiwayat()
         loadGrafik()
+        loadRewardStatus()
     }
 
     private fun updateSaldoVisibility() {
@@ -188,6 +196,79 @@ class OmsetFragment : Fragment() {
                 }
                 override fun onFailure(call: Call<GrafikResponse>, t: Throwable) {
                     if (_binding == null) return
+                }
+            })
+    }
+
+    private fun loadRewardStatus() {
+        if (_binding == null) return
+        ApiClient.instance.getRewardStatus(session.getBearerToken())
+            .enqueue(object : Callback<RewardResponse> {
+                override fun onResponse(call: Call<RewardResponse>, response: Response<RewardResponse>) {
+                    if (_binding == null) return
+                    if (response.isSuccessful && response.body()?.data != null) {
+                        updateRewardUI(response.body()!!.data!!)
+                    }
+                }
+                override fun onFailure(call: Call<RewardResponse>, t: Throwable) {
+                    if (_binding == null) return
+                }
+            })
+    }
+
+    private fun updateRewardUI(data: RewardResponse.RewardData) {
+        if (_binding == null) return
+        val pesanan = data.pesananBulanIni ?: 0
+        val target = data.target ?: 10
+        val sudahKlaim = data.sudahKlaim ?: false
+        val bisaKlaim = data.bisaKlaim ?: false
+
+        binding.tvRewardProgress.text = "$pesanan / $target pesanan"
+        val persen = ((pesanan.toFloat() / target) * 100).toInt().coerceAtMost(100)
+        binding.tvRewardPersen.text = "$persen%"
+        binding.progressReward.max = target
+        binding.progressReward.progress = pesanan.coerceAtMost(target)
+
+        when {
+            sudahKlaim -> {
+                binding.btnKlaimReward.isEnabled = false
+                binding.btnKlaimReward.text = "Reward Sudah Diklaim"
+                binding.btnKlaimReward.backgroundTintList =
+                    android.content.res.ColorStateList.valueOf(Color.parseColor("#888888"))
+            }
+            bisaKlaim -> {
+                binding.btnKlaimReward.isEnabled = true
+                binding.btnKlaimReward.text = "Klaim Reward Rp300.000"
+                binding.btnKlaimReward.backgroundTintList =
+                    android.content.res.ColorStateList.valueOf(Color.parseColor("#A8000E"))
+            }
+            else -> {
+                binding.btnKlaimReward.isEnabled = false
+                binding.btnKlaimReward.text = "Klaim Reward (${target - pesanan} pesanan lagi)"
+                binding.btnKlaimReward.backgroundTintList =
+                    android.content.res.ColorStateList.valueOf(Color.parseColor("#CCCCCC"))
+            }
+        }
+    }
+
+    private fun klaimReward() {
+        binding.btnKlaimReward.isEnabled = false
+        ApiClient.instance.klaimReward(session.getBearerToken())
+            .enqueue(object : Callback<RewardResponse> {
+                override fun onResponse(call: Call<RewardResponse>, response: Response<RewardResponse>) {
+                    if (_binding == null) return
+                    if (response.isSuccessful) {
+                        Toast.makeText(requireContext(), "Reward Rp300.000 berhasil diklaim!", Toast.LENGTH_LONG).show()
+                        loadAllData()
+                    } else {
+                        Toast.makeText(requireContext(), "Gagal klaim reward.", Toast.LENGTH_SHORT).show()
+                        binding.btnKlaimReward.isEnabled = true
+                    }
+                }
+                override fun onFailure(call: Call<RewardResponse>, t: Throwable) {
+                    if (_binding == null) return
+                    Toast.makeText(requireContext(), "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                    binding.btnKlaimReward.isEnabled = true
                 }
             })
     }

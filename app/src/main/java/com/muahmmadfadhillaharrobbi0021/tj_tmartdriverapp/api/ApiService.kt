@@ -78,11 +78,19 @@ interface ApiService {
         @Header("Authorization") token: String
     ): Call<ProfileResponse>
 
-    // Endpoint grafik pendapatan (filter: minggu / bulan)
     @Headers("Accept: application/json")
     @GET("driver/grafik")
     fun getGrafik(
         @Header("Authorization") token: String,
         @Query("filter") filter: String
     ): Call<GrafikResponse>
+
+    // Reward
+    @Headers("Accept: application/json")
+    @GET("driver/reward/status")
+    fun getRewardStatus(@Header("Authorization") token: String): Call<RewardResponse>
+
+    @Headers("Accept: application/json")
+    @POST("driver/reward/klaim")
+    fun klaimReward(@Header("Authorization") token: String): Call<RewardResponse>
 }

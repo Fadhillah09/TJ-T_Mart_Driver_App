@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.R
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.databinding.ItemRiwayatOmsetBinding
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.Pesanan
 import java.text.NumberFormat
@@ -24,14 +25,26 @@ class RiwayatOmsetAdapter(private val list: List<Pesanan>) :
         val item = list[position]
         val b = holder.binding
 
-        // Nama pelanggan
-        b.tvNamaPelanggan.text = item.user?.name ?: "-"
+        val isReward = item.idTransaksi?.startsWith("REWARD-") == true
 
-        // Rute: pakai alamat_display dari API (sama seperti pesanan masuk)
-        val lokasiPelanggan = item.alamatDisplay ?: item.user?.getNamaLokasiLengkap() ?: "-"
-        b.tvRute.text = lokasiPelanggan
+        if (isReward) {
+            // Tampilan khusus row bonus reward
+            b.ivIcon.setImageResource(R.drawable.ic_nav_omset)
+            b.ivIcon.setColorFilter(Color.parseColor("#5DAA64"))
+            b.tvNamaPelanggan.text = "Bonus Reward Bulanan"
+            b.tvRute.text = "Target 150 pesanan tercapai"
+            b.tvRute.setTextColor(Color.parseColor("#5DAA64"))
+        } else {
+            // Tampilan normal pesanan biasa
+            b.ivIcon.setImageResource(R.drawable.ic_motor)
+            b.ivIcon.clearColorFilter()
+            b.tvNamaPelanggan.text = item.user?.name ?: "-"
+            val lokasiPelanggan = item.alamatDisplay ?: item.user?.getNamaLokasiLengkap() ?: "-"
+            b.tvRute.text = lokasiPelanggan
+            b.tvRute.setTextColor(Color.parseColor("#888888"))
+        }
 
-        // Tanggal dari updatedAt
+        // Tanggal dari updatedAt (sama untuk semua row)
         val tanggal = try {
             val formatList = listOf(
                 "yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'",
@@ -57,10 +70,14 @@ class RiwayatOmsetAdapter(private val list: List<Pesanan>) :
         }
         b.tvTanggal.text = tanggal
 
-        // Nominal pendapatan (ongkir Rp3.000)
+        // Nominal pendapatan
         val nf = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
         nf.maximumFractionDigits = 0
-        b.tvNominal.text = "+${nf.format(3000)}"
+        if (isReward) {
+            b.tvNominal.text = "+${nf.format(300000)}"
+        } else {
+            b.tvNominal.text = "+${nf.format(3000)}"
+        }
         b.tvNominal.setTextColor(Color.parseColor("#5DAA64"))
     }
 }

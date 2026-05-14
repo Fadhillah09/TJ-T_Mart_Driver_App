@@ -333,6 +333,129 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- ===== CARD REWARD BULANAN ===== -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Reward Bulanan"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#000000"
+                android:layout_marginBottom="8dp" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardReward"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:cardUseCompatPadding="true"
+                app:cardBackgroundColor="#FFFFFF"
+                app:strokeColor="#E0E0E0"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="16dp">
+
+                    <!-- Baris judul + badge bonus -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="4dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Target Pesanan"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="#000000" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="+Rp300.000"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:textColor="#5DAA64" />
+
+                    </LinearLayout>
+
+                    <!-- Deskripsi -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Selesaikan 150 pesanan bulan ini untuk klaim bonus"
+                        android:textColor="#AAAAAA"
+                        android:textSize="11sp"
+                        android:layout_marginBottom="12dp" />
+
+                    <!-- Progress angka -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="6dp">
+
+                        <TextView
+                            android:id="@+id/tvRewardProgressBeranda"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="0 / 150 pesanan"
+                            android:textSize="12sp"
+                            android:textColor="#555555" />
+
+                        <TextView
+                            android:id="@+id/tvRewardStatusBeranda"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="150 lagi"
+                            android:textSize="11sp"
+                            android:textColor="#AAAAAA" />
+
+                    </LinearLayout>
+
+                    <!-- Progress bar -->
+                    <ProgressBar
+                        android:id="@+id/progressRewardBeranda"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="6dp"
+                        android:max="150"
+                        android:progress="0"
+                        android:progressTint="#5DAA64"
+                        android:progressBackgroundTint="#E0E0E0"
+                        android:layout_marginBottom="14dp" />
+
+                    <!-- Tombol klaim -->
+                    <Button
+                        android:id="@+id/btnKlaimRewardBeranda"
+                        android:layout_width="match_parent"
+                        android:layout_height="44dp"
+                        android:text="Klaim Reward"
+                        android:textColor="#FFFFFF"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:backgroundTint="#A8000E"
+                        android:enabled="false"
+                        app:cornerRadius="10dp" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <!-- ===== END CARD REWARD ===== -->
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -385,7 +508,6 @@
                             android:textSize="12sp"
                             android:gravity="center" />
 
-                        <!-- ← UBAH INI: gravity end → center supaya sejajar badge -->
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"

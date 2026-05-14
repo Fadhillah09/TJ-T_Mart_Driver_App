@@ -18,6 +18,7 @@ import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.MessageResponse
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.OmsetResponse
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.Pesanan
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.PesananResponse
+import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.model.RewardResponse
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main.notifikasi.NotifikasiFragment
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.ui.main.profil.ProfilFragment
 import com.muahmmadfadhillaharrobbi0021.tj_tmartdriverapp.utils.SessionManager
@@ -115,6 +116,11 @@ class BerandaFragment : Fragment() {
             updateSaldoVisibility()
         }
 
+        // listener tombol klaim reward di beranda
+        binding.btnKlaimRewardBeranda.setOnClickListener {
+            klaimReward()
+        }
+
         updateToggleUI()
         updatePesananHariIni()
         loadAllData()
@@ -144,17 +150,87 @@ class BerandaFragment : Fragment() {
         }
     }
 
-    // ← TAMBAH FUNGSI INI: update tampilan counter pesanan harian
+    // update tampilan counter pesanan harian
     private fun updatePesananHariIni() {
         if (_binding == null) return
         val count = session.getPesananHariIni()
         binding.tvPesananHariIni.text = "$count pesanan"
     }
 
+    // update tampilan card reward di beranda — target diambil dari API, bukan hardcode
+    private fun updateRewardUI(jumlah: Int, sudahKlaim: Boolean?, target: Int) {
+        if (_binding == null) return
+        val capped = minOf(jumlah, target)
+        binding.progressRewardBeranda.max = target
+        binding.progressRewardBeranda.progress = capped
+        binding.tvRewardProgressBeranda.text = "$jumlah / $target pesanan"
+        when {
+            sudahKlaim == true -> {
+                binding.tvRewardStatusBeranda.text = "Sudah diklaim"
+                binding.tvRewardStatusBeranda.setTextColor(requireContext().getColor(android.R.color.holo_green_dark))
+                binding.btnKlaimRewardBeranda.isEnabled = false
+                binding.btnKlaimRewardBeranda.text = "Sudah Diklaim"
+            }
+            jumlah >= target -> {
+                binding.tvRewardStatusBeranda.text = "Siap diklaim!"
+                binding.tvRewardStatusBeranda.setTextColor(requireContext().getColor(android.R.color.holo_green_dark))
+                binding.btnKlaimRewardBeranda.isEnabled = true
+                binding.btnKlaimRewardBeranda.text = "Klaim Reward"
+            }
+            else -> {
+                val sisa = target - jumlah
+                binding.tvRewardStatusBeranda.text = "$sisa lagi"
+                binding.tvRewardStatusBeranda.setTextColor(android.graphics.Color.parseColor("#AAAAAA"))
+                binding.btnKlaimRewardBeranda.isEnabled = false
+                binding.btnKlaimRewardBeranda.text = "Klaim Reward"
+            }
+        }
+    }
+
+    // load status reward dari API
+    private fun loadRewardStatus() {
+        ApiClient.instance.getRewardStatus(session.getBearerToken())
+            .enqueue(object : Callback<RewardResponse> {
+                override fun onResponse(call: Call<RewardResponse>, response: Response<RewardResponse>) {
+                    if (_binding == null) return
+                    if (response.isSuccessful && response.body()?.data != null) {
+                        val data = response.body()!!.data!!
+                        updateRewardUI(data.pesananBulanIni ?: 0, data.sudahKlaim, data.target ?: 10)
+                    }
+                }
+                override fun onFailure(call: Call<RewardResponse>, t: Throwable) {
+                    Log.e("REWARD", "Gagal load reward: ${t.message}")
+                }
+            })
+    }
+
+    // klaim reward
+    private fun klaimReward() {
+        binding.btnKlaimRewardBeranda.isEnabled = false
+        ApiClient.instance.klaimReward(session.getBearerToken())
+            .enqueue(object : Callback<RewardResponse> {
+                override fun onResponse(call: Call<RewardResponse>, response: Response<RewardResponse>) {
+                    if (_binding == null) return
+                    if (response.isSuccessful) {
+                        Toast.makeText(requireContext(), "Bonus Rp300.000 berhasil diklaim!", Toast.LENGTH_LONG).show()
+                        loadRewardStatus()
+                        // bonus hanya tampil di halaman Omset, bukan beranda
+                    } else {
+                        Toast.makeText(requireContext(), "Gagal klaim reward.", Toast.LENGTH_SHORT).show()
+                        loadRewardStatus()
+                    }
+                }
+                override fun onFailure(call: Call<RewardResponse>, t: Throwable) {
+                    if (_binding == null) return
+                    Toast.makeText(requireContext(), "Error klaim reward: ${t.message}", Toast.LENGTH_SHORT).show()
+                    loadRewardStatus()
+                }
+            })
+    }
+
     override fun onResume() {
         super.onResume()
         loadFotoProfil()
-        // ← TAMBAH INI: refresh counter saat kembali ke fragment (antisipasi ganti hari)
         updatePesananHariIni()
     }
 
@@ -251,6 +327,7 @@ class BerandaFragment : Fragment() {
                 loadPesanan()
                 loadOmset()
                 loadRiwayat()
+                loadRewardStatus()
             }
 
             override fun onFailure(call: Call<ProfileResponse>, t: Throwable) {
@@ -258,6 +335,7 @@ class BerandaFragment : Fragment() {
                 loadPesanan()
                 loadOmset()
                 loadRiwayat()
+                loadRewardStatus()
             }
         })
     }
@@ -358,7 +436,6 @@ class BerandaFragment : Fragment() {
             .setTitle("Akses Dibatasi")
             .setMessage("Anda harus melakukan absensi terlebih dahulu sebelum melihat detail atau mengambil pesanan.")
             .setPositiveButton("Absen Sekarang") { _, _ ->
-                // Arahkan untuk klik tombol absen di MainActivity
                 Toast.makeText(context, "Klik tombol Fingerprint di bawah", Toast.LENGTH_LONG).show()
             }
             .setNegativeButton("Batal", null)
@@ -394,7 +471,7 @@ class BerandaFragment : Fragment() {
                     if (_binding == null) return
                     if (response.isSuccessful) {
                         Toast.makeText(requireContext(), "Pesanan selesai!", Toast.LENGTH_SHORT).show()
-                        // ← TAMBAH INI: increment counter pesanan harian saat pesanan selesai
+                        // increment counter pesanan harian saat pesanan selesai
                         session.tambahPesananHariIni()
                         updatePesananHariIni()
                         loadAllData()
@@ -437,7 +514,7 @@ class BerandaFragment : Fragment() {
                         val nf = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
                         nf.maximumFractionDigits = 0
 
-                        // ← BERANDA pakai saldo hari ini saja (reset tiap hari)
+                        // BERANDA pakai saldo hari ini saja (reset tiap hari)
                         currentSaldoFormatted = nf.format(data.saldoHariIni ?: 0.0)
                         updateSaldoVisibility()
                         binding.tvNomorRek.text = data.nomorRekening ?: "-"
@@ -458,7 +535,9 @@ class BerandaFragment : Fragment() {
                 override fun onResponse(call: Call<PesananResponse>, response: Response<PesananResponse>) {
                     if (_binding == null) return
                     if (response.isSuccessful && response.body() != null) {
-                        fullRiwayatList = response.body()?.data ?: emptyList()
+                        // filter row bonus reward agar tidak tampil di riwayat beranda
+                        fullRiwayatList = (response.body()?.data ?: emptyList())
+                            .filter { it.idTransaksi?.startsWith("REWARD-") != true }
                         isShowingAllRiwayat = false
                         tampilkanRiwayat()
                     }
