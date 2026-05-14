@@ -170,12 +170,14 @@ class BerandaFragment : Fragment() {
                 binding.tvRewardStatusBeranda.setTextColor(requireContext().getColor(android.R.color.holo_green_dark))
                 binding.btnKlaimRewardBeranda.isEnabled = false
                 binding.btnKlaimRewardBeranda.text = "Sudah Diklaim"
+                binding.btnKlaimRewardBeranda.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#AAAAAA"))
             }
             jumlah >= target -> {
                 binding.tvRewardStatusBeranda.text = "Siap diklaim!"
                 binding.tvRewardStatusBeranda.setTextColor(requireContext().getColor(android.R.color.holo_green_dark))
                 binding.btnKlaimRewardBeranda.isEnabled = true
                 binding.btnKlaimRewardBeranda.text = "Klaim Reward"
+                binding.btnKlaimRewardBeranda.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#A8000E"))
             }
             else -> {
                 val sisa = target - jumlah
@@ -183,6 +185,7 @@ class BerandaFragment : Fragment() {
                 binding.tvRewardStatusBeranda.setTextColor(android.graphics.Color.parseColor("#AAAAAA"))
                 binding.btnKlaimRewardBeranda.isEnabled = false
                 binding.btnKlaimRewardBeranda.text = "Klaim Reward"
+                binding.btnKlaimRewardBeranda.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#AAAAAA"))
             }
         }
     }

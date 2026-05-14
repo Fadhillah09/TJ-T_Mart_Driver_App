@@ -47,8 +47,7 @@
                     android:layout_marginEnd="12dp"
                     android:clickable="true"
                     android:focusable="true"
-                    android:padding="4dp"
-                    app:tint="#888888" />
+                    android:padding="4dp" />
 
                 <FrameLayout
                     android:id="@+id/layoutAvatar"
@@ -439,7 +438,7 @@
                         android:progressBackgroundTint="#E0E0E0"
                         android:layout_marginBottom="14dp" />
 
-                    <!-- Tombol klaim -->
+                    <!-- Tombol klaim — warna dikontrol dari BerandaFragment.kt -->
                     <Button
                         android:id="@+id/btnKlaimRewardBeranda"
                         android:layout_width="match_parent"
@@ -448,7 +447,6 @@
                         android:textColor="#FFFFFF"
                         android:textSize="13sp"
                         android:textStyle="bold"
-                        android:backgroundTint="#A8000E"
                         android:enabled="false"
                         app:cornerRadius="10dp" />
 
